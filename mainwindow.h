@@ -19,6 +19,7 @@
 #include "sacn/streamingacn.h"
 #include <QCoreApplication>
 #include <QGraphicsView>
+#include <QGraphicsScene>
 #include <QNetworkInterface>
 #include <QWindow>
 #include <QDir>
@@ -27,6 +28,7 @@
 #include <QPixmap>
 #include <QShortcut>
 #include <QApplication>
+#include <QCursor>
 
 using namespace oscpkt;
 

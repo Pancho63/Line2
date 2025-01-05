@@ -30,14 +30,23 @@ WindowP::WindowP()
     m_graphicsScene = new QGraphicsScene(this);
     view = new QGraphicsView(m_graphicsScene, this);
 
-    m_graphicsScene->setSceneRect(0, 0, size().width(), size().height());
+    view->setScene(m_graphicsScene);
+
+    // Set the view to full screen
+    view->showFullScreen();
+    view->setSceneRect(m_graphicsScene->itemsBoundingRect());
+    view->setBackgroundBrush(Qt::black);
+    // Remove the border and frame
+    view->setFrameShape(QFrame::NoFrame);
+    // Hide the cursor
+    view->setCursor(Qt::BlankCursor);
 
     // Enable anti-aliasing and smooth transformations for better visual quality
     view->setRenderHint(QPainter::Antialiasing);
     view->setRenderHint(QPainter::SmoothPixmapTransform);
 
 
-    view->setScene(m_graphicsScene);
+
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setBackgroundBrush(QBrush(Qt::black, Qt::SolidPattern));
