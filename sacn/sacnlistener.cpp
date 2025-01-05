@@ -333,7 +333,7 @@ void sACNListener::processDatagram(QByteArray data, QHostAddress receiver, QHost
 
     if(!validpacket)
     {
-        qDebug() << "sACNListener" << QThread::currentThreadId() << ": Source coming up, not processing packet";
+        //qDebug() << "sACNListener" << QThread::currentThreadId() << ": Source coming up, not processing packet";
         return;
     }
 

@@ -5,7 +5,7 @@
 #include <QShortcut>
 #include <QPixmap>
 #include <QDir>
-
+#include <QFile>
 
 int         iarg;
 int         iarg2;
@@ -21,12 +21,13 @@ qreal       vert[5]=      {0, 0, 0, 0, 0};
 qreal       bleu[5]=      {0, 0, 0, 0, 0};
 qreal       epais[5]=     {0, 0, 0, 0, 0};
 int         channel =     61;
-//bool        VpExist=      false;
+
 QSharedPointer<sACNListener> listener;
 
 WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
-{
+{   //initialisations
+
     setupNetworkInterface();
 
     udpSocket = new QUdpSocket(this);
@@ -60,7 +61,7 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
 }
 
-void WindowP::processPendingDatagrams()
+void WindowP::processPendingDatagrams() //OSC traitement
 {
 PacketReader pr;
 while (udpSocket->hasPendingDatagrams()) {
@@ -83,7 +84,7 @@ while (udpSocket->hasPendingDatagrams()) {
         if ((msg->match("/device/COLOUR/GREEN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())&&(channel<=iarg && iarg<=(channel+4)))   {green(iarg, iarg2);}
         if ((msg->match("/device/COLOUR/BLUE").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(channel<=iarg && iarg<=(channel+4)))   {blue (iarg, iarg2);}
         if ((msg->match("/device/BEAM/ZOOM").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {thickness(iarg, iarg2);}
-        if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))             {picture(iarg2);}
+        if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))                       {picture(iarg2);}
            }
 }
 }
@@ -91,61 +92,79 @@ while (udpSocket->hasPendingDatagrams()) {
 
 void WindowP::masterLevel (int ch, int value)
 {
-master[ch-channel] = value;
+    //qDebug()<<"level"<<value;
+if (value>=0) master[ch-channel] = value;
 ligneUpdate();
 }
 
+void WindowP::redSacn(int ch, int value)
+{  //qDebug()<<"R "<<value;
+    if (value>=0) rouge[ch-channel] = value;
+    ligneUpdate();
+}
+
+void WindowP::greenSacn(int ch, int value)
+{  //qDebug()<<"G "<<value;
+    if (value>=0) vert[ch-channel] = value;
+    ligneUpdate();
+}
+
+void WindowP::blueSacn(int ch, int value)
+{  //qDebug()<<"B "<<value;
+    if (value>=0) bleu[ch-channel] = value;
+    ligneUpdate();
+}
+
+void WindowP::red(int ch, int value)
+{  //qDebug()<<"R "<<value;
+    rouge[ch-channel] = ((value+1)/256);
+    ligneUpdate();
+}
+
+void WindowP::green(int ch, int value)
+{  //qDebug()<<"G "<<value;
+    vert[ch-channel] = ((value+1)/256);
+    ligneUpdate();
+}
+
+void WindowP::blue(int ch, int value)
+{  //qDebug()<<"B "<<value;
+    bleu[ch-channel] = ((value+1)/256);
+    ligneUpdate();
+}
 void WindowP::pan (int ch, int value)
-{
-X1[ch-channel] = value;
+{   qDebug()<<"pan "<<value;
+if (value>=0) X1[ch-channel] = value;
 ligneUpdate();
 }
 
 void WindowP::tilt (int ch, int value)
-{
-Y1[ch-channel] = value;
+{  qDebug()<<"tilt "<<value;
+if (value>=0) Y1[ch-channel] = value;
 ligneUpdate();
 }
 
 void WindowP::largeur (int ch, int value)
-{
-X2[ch-channel] = value;
+{  qDebug()<<"L "<<value;
+if (value>=0) X2[ch-channel] = value;
 ligneUpdate();
 }
 
 void WindowP::hauteur (int ch, int value)
-{
-Y2[ch-channel] = value;
+{  qDebug()<<"H "<<value;
+if (value>=0) Y2[ch-channel] = value;
 ligneUpdate();
 }
 
 void WindowP::rotate(int ch, int value)
-{
-R[ch-channel] = 360*value/65280;
-ligneUpdate();
-}
-
-void WindowP::red(int ch, int value)
-{
-rouge[ch-channel] = ((value+1)/256);
-ligneUpdate();
-}
-
-void WindowP::green(int ch, int value)
-{
-vert[ch-channel] = ((value+1)/256);
-ligneUpdate();
-}
-
-void WindowP::blue(int ch, int value)
-{
-bleu[ch-channel] = ((value+1)/256);
+{  //qDebug()<<"rotate "<<value;
+if (value>=0) R[ch-channel] = 360*value/65535;
 ligneUpdate();
 }
 
 void WindowP::thickness(int ch, int value)
-{
-epais[ch-channel] = value*size().width()/650000;
+{  //qDebug()<<"thick "<<value;
+if (value>=0) epais[ch-channel] = value*size().width()/650000;
 ligneUpdate();
 }
 
@@ -156,125 +175,203 @@ void WindowP::picture(int value)
     if (!dir.exists()) {dir.mkpath(".");}
 
     m_graphicsScene->removeItem(pix);
-//    if (VpExist) videoproj->removePix();
 
- switch (value)
- {
- case 0:
-     pict = QPixmap();
-     pix->setPixmap (pict);
-     m_graphicsScene->addItem(pix);
-//     if (VpExist) videoproj->addPix(0);
-          break;
- case 2944:
-    pict = QPixmap();
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(0);
-          break;
- case 8960:
-     pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
-     if (pict.isNull()) break;
-     pict =  pict.scaled(size().width(), size().height());
-     pix->setPixmap (pict);
-     m_graphicsScene->addItem(pix);
-//     if (VpExist) videoproj->addPix(1);
-             break;
-  case 14848:
-     pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/2.png");
-     if (pict.isNull()) break;
-     pict =  pict.scaled(size().width(), size().height());
-     pix->setPixmap (pict);
-     m_graphicsScene->addItem(pix);
-//     if (VpExist) videoproj->addPix(2);
-             break;
- case 20736:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/3.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(3);
-            break;
- case 26624:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/4.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(4);
-            break;
- case 32512:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/5.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(5);
-            break;
- case 38400:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/6.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(6);
-            break;
- case 44288:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/7.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(7);
-            break;
- case 50176:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/8.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(8);
-            break;
- case 56064:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/9.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(9);
-            break;
- case 62208:
-    pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/10.png");
-    if (pict.isNull()) break;
-    pict =  pict.scaled(size().width(), size().height());
-    pix->setPixmap (pict);
-    m_graphicsScene->addItem(pix);
-//    if (VpExist) videoproj->addPix(10);
-            break;
- }
- ligneUpdate();
-// if (VpExist) videoproj->Update2();
+
+    switch (value)
+    {
+    case 0:
+        pict = QPixmap();
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 2944:
+        pict = QPixmap();
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 8960:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 14848:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/2.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 20736:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/3.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 26624:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/4.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 32512:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/5.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 38400:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/6.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 44288:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/7.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 50176:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/8.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 56064:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/9.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    case 62208:
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/10.png");
+        if (pict.isNull()) break;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+        break;
+    }
+    ligneUpdate();
 }
 
-void WindowP::ligneUpdate()
+void WindowP::pictureSacn (int level) //gobos loading sACN
+
 {
-    rect1->setRect(QRectF((X1[0]*size().width()/65280), (Y1[0]*size().height()/65280), (X2[0]*size().width()/65280), (Y2[0]*size().height()/65280)));
+    QString path = (QCoreApplication::applicationDirPath() + "/imageLine/");
+    QDir dir(path);
+    if (!dir.exists()) {dir.mkpath(".");}
+
+    m_graphicsScene->removeItem(pix);
+
+
+    if (level >= 0 && level < 23) {
+        pict = QPixmap();
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 23 && level < 46) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 46 && level < 69) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/2.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 69 && level < 92) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/3.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 92 && level < 115) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/4.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 115 && level < 138) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/5.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 138 && level < 161) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/6.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 161 && level < 184) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/7.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 184 && level < 207) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/8.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 207 && level < 230) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/9.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else if (level >= 230 && level <= 255) {
+        pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/10.png");
+        if (pict.isNull()) return;
+        pict =  pict.scaled(size().width(), size().height());
+        pix->setPixmap (pict);
+        m_graphicsScene->addItem(pix);
+
+    } else {
+        qDebug() << "Valeur de niveau hors de la plage attendue";
+    }
+}
+
+
+void WindowP::ligneUpdate() //drawings
+{
+    rect1->setRect(QRectF((X1[0]*size().width()/65535), (Y1[0]*size().height()/65535), (X2[0]*size().width()/65535), (Y2[0]*size().height()/65535)));
     rect1->setPen(QPen(QColor(rouge[0], vert[0], bleu[0], master[0]), epais[0]));
     rect1->setTransformOriginPoint(rect1->boundingRect().center());
     rect1->setRotation(R[0]);
 
-    rect2->setRect(QRectF(((size().width()-X1[1]*size().width()/65280)-X2[1]*size().width()/65280), ((size().height()-Y1[1]*size().height()/65280)-Y2[1]*size().height()/65280), (X2[1]*size().width()/65280), (Y2[1]*size().height()/65280)));
+    rect2->setRect(QRectF(((size().width()-X1[1]*size().width()/65535)-X2[1]*size().width()/65535), ((size().height()-Y1[1]*size().height()/65535)-Y2[1]*size().height()/65535), (X2[1]*size().width()/65535), (Y2[1]*size().height()/65535)));
     rect2->setPen(QPen(QColor(rouge[1], vert[1], bleu[1], master[1]), epais[1]));
     rect2->setTransformOriginPoint(rect2->boundingRect().center());
     rect2->setRotation(R[1]);
 
-    ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65280)-X2[2]*size().width()/65280), (Y1[2]*size().height()/65280), (X2[2]*size().width()/65280), (Y2[2]*size().height()/65280)));
+    ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65535)-X2[2]*size().width()/65535), (Y1[2]*size().height()/65535), (X2[2]*size().width()/65535), (Y2[2]*size().height()/65535)));
     ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2]));
     ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
     ellipse1->setRotation(R[2]);
 
-    ellipse2->setRect(QRectF((X1[3]*size().width()/65280), ((size().height()-Y1[3]*size().height()/65280)-Y2[3]*size().height()/65280), (X2[3]*size().width()/65280), (Y2[3]*size().height()/65280)));
+    ellipse2->setRect(QRectF((X1[3]*size().width()/65535), ((size().height()-Y1[3]*size().height()/65535)-Y2[3]*size().height()/65535), (X2[3]*size().width()/65535), (Y2[3]*size().height()/65535)));
     ellipse2->setPen(QPen(QColor(rouge[3], vert[3], bleu[3], master[3]), epais[3]));
     ellipse2->setTransformOriginPoint(ellipse2->boundingRect().center());
     ellipse2->setRotation(R[3]);
@@ -286,17 +383,60 @@ void WindowP::ligneUpdate()
     qreal vPix = Y2[4]*size().height()/127;
     pix->setOpacity(master[4]/255);
     QTransform trans;
-    trans.setMatrix(hPix/65280,0,0,0,vPix/65280,0,xPix/65280,yPix/65280,1);
+    trans.setMatrix(hPix/65535,0,0,0,vPix/65535,0,xPix/65535,yPix/65535,1);
     pix->setTransform(trans);
     pix->setTransformOriginPoint(pix->boundingRect().center());
     pix->setRotation(R[4]);
 }
-void WindowP::setupNetworkInterface() {
+
+void WindowP::setupNetworkInterface() { //interface sACN
     // Obtenir la liste de toutes les interfaces réseau
     QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
 
     // Spécifiez le nom de l'interface réseau que vous souhaitez utiliser
-    QString interfaceName = "enp2s0f1"; // Remplacez par le nom réel de votre interface réseau
+    // Actions spécifiques en fonction du système d'exploitation
+
+    #if defined(Q_OS_MACOS)
+        qDebug() << "Running on macOS";
+    // Code spécifique à macOS
+        QString interfaceName = "en0";
+
+    #elif defined(Q_OS_LINUX)
+    //  vérifications supplémentaires pour Ubuntu et Raspbian
+
+    #if __has_include(<Ubuntu-specific-header.h>)
+        qDebug() << "Running on Ubuntu";
+        // Code spécifique à Ubuntu
+    QString interfaceName = "enp2s0f1";
+
+    #elif __has_include(<Raspbian-specific-header.h>)
+        qDebug() << "Running on Raspbian";
+        // Code spécifique à Raspbian
+        //QString interfaceName = "";
+    #else
+        qDebug() << "Running on an unknown Linux distribution";
+
+    // Code pour une distribution Linux inconnue
+        //wifi :
+        QString interfaceName = "wlp3s0";
+
+        //cable :
+        //QString interfaceName = "enp2s0f1";
+
+    #endif
+
+
+
+    #elif defined(Q_OS_WIN)
+        qDebug() << "Running on Windows";
+        // Code spécifique à Windows
+        //QString interfaceName = "";
+    #else
+        qDebug() << "Running on an unsupported OS";
+        // Code pour un système d'exploitation non supporté
+        //QString interfaceName = "";
+    #endif
+
     QNetworkInterface selectedInterface;
 
     // Trouvez l'interface réseau par son nom
@@ -318,7 +458,7 @@ void WindowP::setupNetworkInterface() {
         rxSocket.setNetworkInterface(selectedInterface);
 
         // Continuez avec les autres opérations sur rxSocket
-        int universe = 1;  // universe in range 1-63999
+        int universe = 7;  // universe in range 1-63999
         listener = sACNManager::getInstance()->getListener(universe);
         if (listener) {
             connect(listener.data(), SIGNAL(levelsChanged()), this, SLOT(onLevelsChanged()));
@@ -328,63 +468,94 @@ void WindowP::setupNetworkInterface() {
         }
     } else {
         qDebug() << "Interface non trouvée.";
+        // Iterate through the list of interfaces and print their details
+        for (const QNetworkInterface &interface : interfaces) {
+            qDebug() << "Interface Name:" << interface.humanReadableName();
+            qDebug() << "Hardware Address:" << interface.hardwareAddress();
+
+            // Get all IP addresses associated with this interface
+            QList<QNetworkAddressEntry> entries = interface.addressEntries();
+            for (const QNetworkAddressEntry &entry : entries) {
+                qDebug() << "IP Address:" << entry.ip().toString();
+                qDebug() << "Netmask:" << entry.netmask().toString();
+                qDebug() << "Broadcast:" << entry.broadcast().toString();
+            }
+            qDebug() << "--------------------------------------";
+        }
     }
 }
 
-void WindowP::onLevelsChanged() {
-    qDebug() << "Slot onLevelsChanged called!";
+void WindowP::onLevelsChanged() //update sACN -> dmx levels
+{
+    //qDebug() << "Slot onLevelsChanged called!";
 
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
-    for (int channel = 100; channel < 200; ++channel) {
-        qDebug() << "tableau1 ";
-        if (channel < 512) {
-            qDebug() << "tableau2 ";
-            qDebug() << "dmxData.size:" << dmxData.size();
-             qDebug() << "listener.size:" << listener->mergedLevels().size();
+    for (int channel = 99; channel < 197; ++channel) {
+
+        if (channel < 197) {
             if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
-                dmxData[channel] = listener->mergedLevels()[channel].level;
+                dmxData[channel+1] = listener->mergedLevels()[channel].level;
             } else {
                 qWarning() << "Channel index out of bounds:" << channel;
             }
-            qDebug() << "tableau3 ";
         }
     }
-    qDebug() << "tableau mis à jour";
+    //qDebug() << "tableau mis à jour";
     processDMXData();
 }
 
 void WindowP::processDMXData() {
     // Traiter les données DMX pour les canaux entre 100 et 199
     for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
+        // Définir les valeurs de `ch` en fonction de baseChannel
+        int ch = 0;
+        switch (baseChannel) {
+        case 100: ch = 61; break;
+        case 120: ch = 62; break;
+        case 140: ch = 63; break;
+        case 160: ch = 64; break;
+        case 180: ch = 65; break;
+        }
+
         // Traiter les canaux 8 bits (100-103, 120-123, 140-143, etc.)
         for (int i = 0; i < 4; ++i) {
             int channel = baseChannel + i;
-            if (channel < 512) {
+            if (channel < 197 && channel>=100) {
                 int level = dmxData[channel];
-                qDebug() << "8-bit channel" << channel << "level:" << level;
-                // Ajoutez votre traitement pour les canaux 8 bits ici
+                // traitement pour les 4 premiers canaux 8 bits
+                switch (i) {
+                case 0: masterLevel(ch, level); break;
+                case 1: redSacn(ch, level); break;
+                case 2: greenSacn(ch, level); break;
+                case 3: blueSacn(ch, level); break;
+                }
             }
         }
 
-        // Traiter les canaux 16 bits (104-108, 124-128, 144-148, etc.)
-        for (int i = 4; i < 9; i += 2) {
+        // Traiter les canaux 16 bits (104-116, 124-136, 144-156, etc.)
+        for (int i = 4; i < 16; i += 2) {
             int highChannel = baseChannel + i;
             int lowChannel = baseChannel + i + 1;
             if (highChannel < 512 && lowChannel < 512) {
                 int highByte = dmxData[highChannel];
                 int lowByte = dmxData[lowChannel];
                 int combinedValue = (highByte << 8) | lowByte;
-                qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
-                // Ajoutez votre traitement pour les canaux 16 bits ici
+                //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
+                // traitement pour les canaux 16 bits
+                switch (i) {
+                case 4: pan(ch, combinedValue); break;
+                case 6: tilt(ch, combinedValue); break;
+                case 8: largeur(ch, combinedValue); break;
+                case 10: hauteur(ch, combinedValue); break;
+                case 12: thickness(ch, combinedValue); break;
+                case 14: rotate(ch, combinedValue); break;
+                }
             }
         }
 
-        // Traiter le canal 8 bits supplémentaire (109, 129, 149, etc.)
-        int extraChannel = baseChannel + 9;
-        if (extraChannel < 512) {
-            int level = dmxData[extraChannel];
-            qDebug() << "8-bit channel" << extraChannel << "level:" << level;
-            // Ajoutez votre traitement pour ce canal 8 bits ici
-        }
+            int level = dmxData[196];
+            //qDebug() << "8-bit channel" << channel << "level:" << level;
+            // traitement pour ce canal 8 bits ici
+            pictureSacn(level);
     }
 }

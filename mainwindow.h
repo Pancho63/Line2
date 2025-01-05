@@ -70,8 +70,12 @@ private slots:
     void red(int, int);
     void green(int, int);
     void blue(int, int);
+    void redSacn(int, int);
+    void greenSacn(int, int);
+    void blueSacn(int, int);
     void thickness(int, int);
     void picture(int);
+    void pictureSacn(int);
     void ligneUpdate();
 
 public slots:
