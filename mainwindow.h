@@ -1,45 +1,44 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QUdpSocket>
-#include "oscpkt.hh"
-#include "sacn/consts.h"
-#include "sacn/sacnlistener.h"
-#include "sacn/sacnsocket.h"
-#include "sacn/sacnuniverselistmodel.h"
-#include "sacn/streamcommon.h"
-#include "sacn/streamingacn.h"
-#include "sacn/ACNShare/CID.h"
-#include "sacn/ACNShare/defpack.h"
-#include "sacn/ACNShare/deftypes.h"
-#include "sacn/ACNShare/ipaddr.h"
-#include "sacn/ACNShare/tock.h"
-#include "sacn/ACNShare/VHD.h"
-#include <QTextStream>
+#include <QCheckBox>
 #include <QGraphicsLineItem>
 #include <QGraphicsRectItem>
-#include <QPen>
+#include <QGraphicsEllipseItem>
 #include <QKeyEvent>
-#include <QCheckBox>
-//#include "videoproj.h"
-#include <QWindow>
-#include <QGraphicsView>
+#include <QPen>
+#include <QTextStream>
+#include <QUdpSocket>
+#include "oscpkt.hh"
+#include "sacn/ACNShare/CID.h"
+#include "sacn/ACNShare/VHD.h"
+#include "sacn/ACNShare/defpack.h"
+#include "sacn/ACNShare/ipaddr.h"
+#include "sacn/ACNShare/tock.h"
+#include "sacn/sacnlistener.h"
+#include "sacn/streamingacn.h"
 #include <QCoreApplication>
+#include <QGraphicsView>
 #include <QNetworkInterface>
-
+#include <QWindow>
+#include <QDir>
+#include <QFile>
+#include <QDebug>
+#include <QPixmap>
+#include <QShortcut>
+#include <QApplication>
 
 using namespace oscpkt;
-
 
 class WindowP : public QWidget
 {
     Q_OBJECT
 
 public:
-     WindowP();
+    WindowP();
 
 private:
-    QUdpSocket  *udpSocket;
+    QUdpSocket *udpSocket;
     QNetworkInterface interface;
     QSharedPointer<sACNListener> listener;
     void setupNetworkInterface();
@@ -56,11 +55,11 @@ private:
 
     QGraphicsView *view;
 
-//    VideoProj *videoproj;
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void processPendingDatagrams();
-
     void masterLevel(int, int);
     void pan(int, int);
     void tilt(int, int);
@@ -79,8 +78,7 @@ private slots:
     void ligneUpdate();
 
 public slots:
-     void onLevelsChanged();
-
+    void onLevelsChanged();
 };
 
 #endif // MAINWINDOW_H
