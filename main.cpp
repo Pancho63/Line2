@@ -4,10 +4,9 @@
 int main(int argc, char *argv[])
 {
     //QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication a(argc, argv);
-    WindowP Wind;
-    Wind.showFullScreen();
-    Wind.show();
+    QApplication app(argc, argv);
+    WindowP window;
+    window.showFullScreen();
 
-    return a.exec();
+    return app.exec();
 }
