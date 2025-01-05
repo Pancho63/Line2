@@ -21,6 +21,7 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsRectItem>
 #include <QGraphicsEllipseItem>
+#include <QGraphicsPixmapItem>
 #include <QPen>
 #include <QPixmap>
 #include <QCursor>

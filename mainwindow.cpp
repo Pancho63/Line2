@@ -27,20 +27,24 @@ WindowP::WindowP()
     udpSocket->bind(7003);
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
 
+
+
+    // Initialize the scene
     scene = new QGraphicsScene(this);
+
     // Définir la couleur de fond de la scène en noir
     scene->setBackgroundBrush(QBrush(Qt::black, Qt::SolidPattern));
 
+    // Initialize the view and set the scene
     view = new QGraphicsView(scene, this);
 
+    // Remove scroll bars
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    view->setScene(scene);
-
-    // Set the view to full screen
-    view->showFullScreen();
-    view->setSceneRect(scene->itemsBoundingRect());
     // Remove the border and frame
     view->setFrameShape(QFrame::NoFrame);
+
     // Hide the cursor
     view->setCursor(Qt::BlankCursor);
 
@@ -48,25 +52,34 @@ WindowP::WindowP()
     view->setRenderHint(QPainter::Antialiasing);
     view->setRenderHint(QPainter::SmoothPixmapTransform);
 
+    // Set the view to full screen
+    view->showFullScreen();
 
 
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setBackgroundBrush(QBrush(Qt::black, Qt::SolidPattern));
-    view->setAutoFillBackground(true);
-    view->show();
 
-    rect1 =    new QGraphicsRectItem();
-    rect2 =    new QGraphicsRectItem();
-    ellipse1 = new QGraphicsEllipseItem();
-    ellipse2 = new QGraphicsEllipseItem();
-    pix =      new QGraphicsPixmapItem();
-
+    // Add example items to the scene
+    QGraphicsRectItem *rect1 = new QGraphicsRectItem(0, 0, 0, 0);
+    rect1->setPen(QPen(Qt::blue, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     scene->addItem(rect1);
-    scene->addItem(rect2);
+
+    QGraphicsEllipseItem *ellipse1 = new QGraphicsEllipseItem(150, 0, 0, 0);
+    ellipse1->setPen(QPen(Qt::red, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     scene->addItem(ellipse1);
+
+    QGraphicsRectItem *rect2 = new QGraphicsRectItem(0, 0, 0, 0);
+    rect2->setPen(QPen(Qt::blue, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    scene->addItem(rect2);
+
+    QGraphicsEllipseItem *ellipse2 = new QGraphicsEllipseItem(150, 0, 100, 100);
+    ellipse2->setPen(QPen(Qt::red, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     scene->addItem(ellipse2);
+
+    QGraphicsPixmapItem *pix = new QGraphicsPixmapItem();
+    //pix->setPen(QPen(Qt::red, 5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     scene->addItem(pix);
+
+   // Ensure the scene rect fits the view size
+    view->setSceneRect(view->rect());
 }
 
 // Override the resizeEvent to adjust the view to fit the window
@@ -446,56 +459,144 @@ void WindowP::pictureSacn(int level) //gobos loading sACN
 
 void WindowP::ligneUpdate() //drawings
 {
-    rect1->setRect(QRectF((X1[0] * size().width() / 65535),
-                          (Y1[0] * size().height() / 65535),
-                          (X2[0] * size().width() / 65535),
-                          (Y2[0] * size().height() / 65535)));
-    QPen pen(QColor(rouge[0], vert[0], bleu[0], master[0]), epais[0], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-    rect1->setPen(pen);
-    rect1->setTransformOriginPoint(rect1->boundingRect().center());
-    rect1->setRotation(R[0]);
+    // Ensure rect1 is initialized
+    rect1 = new QGraphicsRectItem();
+    scene->addItem(rect1);
 
-    rect2->setRect(
-        QRectF(((size().width() - X1[1] * size().width() / 65535) - X2[1] * size().width() / 65535),
-               ((size().height() - Y1[1] * size().height() / 65535)
-                - Y2[1] * size().height() / 65535),
-               (X2[1] * size().width() / 65535),
-               (Y2[1] * size().height() / 65535)));
-    rect2->setPen(QPen(QColor(rouge[1], vert[1], bleu[1], master[1]), epais[1]));
-    rect2->setTransformOriginPoint(rect2->boundingRect().center());
-    rect2->setRotation(R[1]);
+    // Set the rectangle's properties
+    if (rect1) {
+        qreal x1 = X1[0] * size().width() / 65535;
+        qreal y1 = Y1[0] * size().height() / 65535;
+        qreal x2 = X2[0] * size().width() / 65535;
+        qreal y2 = Y2[0] * size().height() / 65535;
 
-    ellipse1->setRect(
-        QRectF(((size().width() - X1[2] * size().width() / 65535) - X2[2] * size().width() / 65535),
-               (Y1[2] * size().height() / 65535),
-               (X2[2] * size().width() / 65535),
-               (Y2[2] * size().height() / 65535)));
-    QPen pen2(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-    ellipse1->setPen(pen2);
-    ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
-    ellipse1->setRotation(R[2]);
+        // Check if the calculated values are valid
+        if (x1 >= 0 && y1 >= 0 && x2 >= 0 && y2 >= 0) {
+            rect1->setRect(QRectF(x1, y1, x2, y2));
 
-    ellipse2->setRect(QRectF((X1[3] * size().width() / 65535),
-                             ((size().height() - Y1[3] * size().height() / 65535)
-                              - Y2[3] * size().height() / 65535),
-                             (X2[3] * size().width() / 65535),
-                             (Y2[3] * size().height() / 65535)));
-    ellipse2->setPen(QPen(QColor(rouge[3], vert[3], bleu[3], master[3]), epais[3]));
-    ellipse2->setTransformOriginPoint(ellipse2->boundingRect().center());
-    ellipse2->setRotation(R[3]);
+            QPen pen(QColor(rouge[0], vert[0], bleu[0], master[0]), epais[0], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            rect1->setPen(pen);
+            rect1->setTransformOriginPoint(rect1->boundingRect().center());
+            rect1->setRotation(R[0]);
+        } else {
+            qDebug() << "Invalid rectangle1 coordinates: " << x1 << ", " << y1 << ", " << x2 << ", " << y2;
+        }
+    } else {
+        qDebug() << "rect1 is not initialized.";
+    }
+    //qDebug() << "1 passed";
 
-    // Ensure smooth transformation for pixmap
-    pix->setTransformationMode(Qt::SmoothTransformation);
-    qreal xPix = X1[4] * size().width();
-    qreal yPix = Y1[4] * size().height();
-    qreal hPix = X2[4] * size().width() / 127;
-    qreal vPix = Y2[4] * size().height() / 127;
-    pix->setOpacity(master[4] / 255);
-    QTransform trans;
-    trans.setMatrix(hPix / 65535, 0, 0, 0, vPix / 65535, 0, xPix / 65535, yPix / 65535, 1);
-    pix->setTransform(trans);
-    pix->setTransformOriginPoint(pix->boundingRect().center());
-    pix->setRotation(R[4]);
+    // Ensure rect2 is initialized
+    rect2 = new QGraphicsRectItem();
+    scene->addItem(rect2);
+
+    // Set the rectangle's properties
+    if (rect2) {
+        qreal x1 = X1[1] * size().width() / 65535;
+        qreal y1 = Y1[1] * size().height() / 65535;
+        qreal x2 = X2[1] * size().width() / 65535;
+        qreal y2 = Y2[1] * size().height() / 65535;
+
+        // Check if the calculated values are valid
+        if (x1 >= 0 && y1 >= 0 && x2 >= 0 && y2 >= 0) {
+            rect2->setRect(QRectF(x1, y1, x2, y2));
+
+            QPen pen1(QColor(rouge[1], vert[1], bleu[1], master[1]), epais[1], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            rect2->setPen(pen1);
+            rect2->setTransformOriginPoint(rect2->boundingRect().center());
+            rect2->setRotation(R[1]);
+        } else {
+            qDebug() << "Invalid rectangle2 coordinates: " << x1 << ", " << y1 << ", " << x2 << ", " << y2;
+        }
+    } else {
+        qDebug() << "rect2 is not initialized.";
+    }
+    //qDebug() << "2 passed";
+
+    // Ensure ellipse1 is initialized
+    ellipse1 = new QGraphicsEllipseItem();
+    scene->addItem(ellipse1);
+
+    // Set the ellipse's properties
+    if (ellipse1) {
+        qreal x1 = X1[2] * size().width() / 65535;
+        qreal y1 = Y1[2] * size().height() / 65535;
+        qreal x2 = X2[2] * size().width() / 65535;
+        qreal y2 = Y2[2] * size().height() / 65535;
+
+        // Check if the calculated values are valid
+        if (x1 >= 0 && y1 >= 0 && x2 >= 0 && y2 >= 0) {
+            ellipse1->setRect(QRectF(x1, y1, x2, y2));
+
+            QPen pen3(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            ellipse1->setPen(pen3);
+            ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
+            ellipse1->setRotation(R[2]);
+        } else {
+            qDebug() << "Invalid ellipse1 coordinates: " << x1 << ", " << y1 << ", " << x2 << ", " << y2;
+        }
+    } else {
+        qDebug() << "ellipse1 is not initialized.";
+    }
+    //qDebug() << "3 passed";
+
+    // Ensure ellipse2 is initialized
+    ellipse2 = new QGraphicsEllipseItem();
+    scene->addItem(ellipse2);
+
+    // Set the ellipse's properties
+    if (ellipse2) {
+        qreal x1 = X1[3] * size().width() / 65535;
+        qreal y1 = Y1[3] * size().height() / 65535;
+        qreal x2 = X2[3] * size().width() / 65535;
+        qreal y2 = Y2[3] * size().height() / 65535;
+
+        // Check if the calculated values are valid
+        if (x1 >= 0 && y1 >= 0 && x2 >= 0 && y2 >= 0) {
+            ellipse2->setRect(QRectF(x1, y1, x2, y2));
+
+            QPen pen4(QColor(rouge[3], vert[3], bleu[3], master[3]), epais[3], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+            ellipse2->setPen(pen4);
+            ellipse2->setTransformOriginPoint(ellipse2->boundingRect().center());
+            ellipse2->setRotation(R[3]);
+        } else {
+            qDebug() << "Invalid ellipse coordinates: " << x1 << ", " << y1 << ", " << x2 << ", " << y2;
+        }
+    } else {
+        qDebug() << "ellipse2 is not initialized.";
+    }
+    //qDebug() << "4 passed";
+
+    // Ensure pix is initialized
+    pix = new QGraphicsPixmapItem();
+    scene->addItem(pix);
+
+    // Set the pixmap's properties
+    if (pix) {
+
+        pix->setTransformationMode(Qt::SmoothTransformation);
+        qreal x1 = X1[4] * size().width();
+        qreal y1 = Y1[4] * size().height();
+        qreal x2 = X2[4] * size().width() / 127;
+        qreal y2 = Y2[4] * size().height() / 127;
+
+        // Check if the calculated values are valid
+        if (x1 >= 0 && y1 >= 0 && x2 >= 0 && y2 >= 0) {
+            // Set the position and scale of the pixmap
+            pix->setPos(x1, y1);
+            pix->setScale(x2 / y2);
+
+            // Set additional properties if needed
+            pix->setOpacity(master[4] / 255);
+            pix->setTransformOriginPoint(pix->boundingRect().center());
+            pix->setRotation(R[4]);
+        } else {
+            qDebug() << "Invalid pixmap coordinates: " << x1 << ", " << y1 << ", " << x2 << ","<< y2;
+        }
+    } else {
+        qDebug() << "pix is not initialized.";
+    }
+    //qDebug() << "5 passed";
 }
 
 void WindowP::setupNetworkInterface()
