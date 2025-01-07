@@ -2,37 +2,37 @@
 #define MAINWINDOW_H
 
 #include <QUdpSocket>
+#include <QNetworkInterface>
 #include "oscpkt.hh"
-//#include "sacn/consts.h"
-#include "sacn/sacnlistener.h"
-//#include "sacn/sacnsocket.h"
-//#include "sacn/sacnuniverselistmodel.h"
-//#include "sacn/streamcommon.h"
-#include "sacn/streamingacn.h"
 #include "sacn/ACNShare/CID.h"
+#include "sacn/ACNShare/VHD.h"
 #include "sacn/ACNShare/defpack.h"
-//#include "sacn/ACNShare/deftypes.h"
 #include "sacn/ACNShare/ipaddr.h"
 #include "sacn/ACNShare/tock.h"
-#include "sacn/ACNShare/VHD.h"
-#include <QTextStream>
-#include <QGraphicsLineItem>
-#include <QGraphicsRectItem>
-#include <QPen>
-#include <QKeyEvent>
-#include <QCheckBox>
+#include "sacn/sacnlistener.h"
+#include "sacn/streamingacn.h"
+
+#include <QApplication>
+#include <QCoreApplication>
+
 #include <QWindow>
 #include <QGraphicsView>
-#include <QCoreApplication>
-#include <QApplication>
-#include <QNetworkInterface>
-#include <QKeyEvent>
-
-#include <QDebug>
-#include <QShortcut>
+#include <QGraphicsScene>
+#include <QGraphicsLineItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsPixmapItem>
+#include <QPen>
 #include <QPixmap>
+#include <QCursor>
+
+#include <QTextStream>
 #include <QDir>
 #include <QFile>
+#include <QDebug>
+#include <QKeyEvent>
+#include <QShortcut>
+
 
 using namespace oscpkt;
 
@@ -51,7 +51,7 @@ private:
     QUdpSocket  *udpSocket;
     QNetworkInterface interface;
     QSharedPointer<sACNListener> listener;
-    void setupNetworkInterface();
+    void setupNetworkInterfaces();
     void processDMXData();
 
     QVector<int> dmxData;
@@ -59,7 +59,7 @@ private:
     QGraphicsEllipseItem *ellipse1;
     QGraphicsRectItem *rect2;
     QGraphicsEllipseItem *ellipse2;
-    QGraphicsScene *m_graphicsScene;
+    QGraphicsScene *scene;
     QGraphicsPixmapItem *pix;
     QPixmap pict;
 

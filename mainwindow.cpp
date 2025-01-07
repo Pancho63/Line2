@@ -21,36 +21,29 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
 {   //initialisations
 
-    setupNetworkInterface();
-
-    udpSocket = new QUdpSocket(this);
-    udpSocket->bind(7003);
-      connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
-
+    setupNetworkInterfaces();
 
     view = new QGraphicsView(this);
-    m_graphicsScene = new QGraphicsScene(this);
-    view->setScene(m_graphicsScene);
-    view->setBackgroundBrush(QBrush(Qt::black, Qt::SolidPattern));
-    view->setRenderHints(QPainter::Antialiasing);
-    view->setRenderHints(QPainter::SmoothPixmapTransform);
-    view->setAutoFillBackground(true);
+    scene = new QGraphicsScene(this);
+    view->setScene(scene);
+    showFullScreen();
+
 
     // Récupérer la définition de l'écran
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
     view->setSceneRect(screenGeometry);  // Définir la taille de la scène
-
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
+    // y adapter la vue
     view->setFixedWidth(screenWidth);
     view->setFixedHeight(screenHeight);
-    /* Afficher la taille de l'écran dans la console
-    qDebug() << "Screen width:" << screenWidth;
-    qDebug() << "Screen height:" << screenHeight;*/
 
-    // Étendre la fenêtre principale à tout l'écran
-    showFullScreen();
+    // fond noir et meilleure qualité
+    view->setBackgroundBrush(QBrush(Qt::black, Qt::SolidPattern));
+    view->setAutoFillBackground(true);
+    view->setRenderHints(QPainter::Antialiasing);
+    view->setRenderHints(QPainter::SmoothPixmapTransform);
 
     // Remove the border and frame
     view->setFrameShape(QFrame::NoFrame);
@@ -58,22 +51,22 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
     // Hide the cursor
     view->setCursor(Qt::BlankCursor);
 
-
+    // no scrollBars
     view->setVerticalScrollBarPolicy  ( Qt::ScrollBarAlwaysOff );
     view->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 
 
-    rect1 = new QGraphicsRectItem();
-    rect2 = new QGraphicsRectItem();
+    // Add items to the scene
+    rect1 =   new QGraphicsRectItem();
+    rect2 =   new QGraphicsRectItem();
     ellipse1= new QGraphicsEllipseItem();
     ellipse2= new QGraphicsEllipseItem();
-    pix = new QGraphicsPixmapItem();
-
-    m_graphicsScene->addItem(rect1);
-    m_graphicsScene->addItem(rect2);
-    m_graphicsScene->addItem(ellipse1);
-    m_graphicsScene->addItem(ellipse2);
-    m_graphicsScene->addItem(pix);
+    pix =     new QGraphicsPixmapItem();
+    scene->addItem(rect1);
+    scene->addItem(rect2);
+    scene->addItem(ellipse1);
+    scene->addItem(ellipse2);
+    scene->addItem(pix);
 
 }
 // Override the keyPressEvent to handle the backspace key
@@ -116,7 +109,7 @@ while (udpSocket->hasPendingDatagrams()) {
 
 void WindowP::masterLevel (int ch, int value)
 {
-    qDebug()<<"level"<<value;
+    //qDebug()<<"level"<<value;
 if (value>=0) master[ch-channel] = value;
 ligneUpdate();
 }
@@ -157,7 +150,7 @@ void WindowP::blue(int ch, int value)
     ligneUpdate();
 }
 void WindowP::pan (int ch, int value)
-{   qDebug()<<"pan "<<value;
+{   //qDebug()<<"pan "<<value;
 if (value>=0) X1[ch-channel] = value;
 ligneUpdate();
 }
@@ -198,7 +191,7 @@ void WindowP::picture(int value)
     QDir dir(path);
     if (!dir.exists()) {dir.mkpath(".");}
 
-    //m_graphicsScene->removeItem(pix);
+    //scene->removeItem(pix);
 
 
     switch (value)
@@ -206,82 +199,82 @@ void WindowP::picture(int value)
     case 0:
         pict = QPixmap();
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 2944:
         pict = QPixmap();
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 8960:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 14848:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/2.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 20736:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/3.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 26624:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/4.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 32512:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/5.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 38400:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/6.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 44288:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/7.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 50176:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/8.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 56064:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/9.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     case 62208:
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/10.png");
         if (pict.isNull()) break;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        m_graphicsScene->addItem(pix);
+        scene->addItem(pix);
         break;
     }
     ligneUpdate();
@@ -294,13 +287,13 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
     QDir dir(path);
     if (!dir.exists()) {dir.mkpath(".");}
 
-    // m_graphicsScene->removeItem(pix);
+    // scene->removeItem(pix);
     //qDebug() <<"gobo init";
 
     if (level >= 0 && level < 23) {
         pict = QPixmap();
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
         //qDebug() <<"gobo 0";
 
     } else if (level >= 23 && level < 46) {
@@ -308,7 +301,7 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
         if (pict.isNull()) {qDebug() <<"gobo 1 null " << (QCoreApplication::applicationDirPath() + "/imageLine/1.png"); return;}
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
         //qDebug() <<"gobo 1";
 
     } else if (level >= 46 && level < 69) {
@@ -316,7 +309,7 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
         //qDebug() <<"gobo 2";
 
     } else if (level >= 69 && level < 92) {
@@ -324,56 +317,56 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 92 && level < 115) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/4.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 115 && level < 138) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/5.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 138 && level < 161) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/6.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 161 && level < 184) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/7.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 184 && level < 207) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/8.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 207 && level < 230) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/9.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else if (level >= 230 && level <= 255) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/10.png");
         if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
-        //m_graphicsScene->addItem(pix);
+        //scene->addItem(pix);
 
     } else {
         qDebug() << "Valeur de niveau hors de la plage attendue";
@@ -384,30 +377,30 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
 void WindowP::ligneUpdate() //drawings
 {
     rect1->setRect(QRectF((X1[0]*size().width()/65535), (Y1[0]*size().height()/65535), (X2[0]*size().width()/65535), (Y2[0]*size().height()/65535)));
-    rect1->setPen(QPen(QColor(rouge[0], vert[0], bleu[0], master[0]), epais[0]));
+    rect1->setPen(QPen(QColor(rouge[0], vert[0], bleu[0], master[0]), epais[0], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     rect1->setTransformOriginPoint(rect1->boundingRect().center());
     rect1->setRotation(R[0]);
 
     rect2->setRect(QRectF(((size().width()-X1[1]*size().width()/65535)-X2[1]*size().width()/65535), ((size().height()-Y1[1]*size().height()/65535)-Y2[1]*size().height()/65535), (X2[1]*size().width()/65535), (Y2[1]*size().height()/65535)));
-    rect2->setPen(QPen(QColor(rouge[1], vert[1], bleu[1], master[1]), epais[1]));
+    rect2->setPen(QPen(QColor(rouge[1], vert[1], bleu[1], master[1]), epais[1],Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     rect2->setTransformOriginPoint(rect2->boundingRect().center());
     rect2->setRotation(R[1]);
 
     ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65535)-X2[2]*size().width()/65535), (Y1[2]*size().height()/65535), (X2[2]*size().width()/65535), (Y2[2]*size().height()/65535)));
-    ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2]));
+    ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
     ellipse1->setRotation(R[2]);
 
     ellipse2->setRect(QRectF((X1[3]*size().width()/65535), ((size().height()-Y1[3]*size().height()/65535)-Y2[3]*size().height()/65535), (X2[3]*size().width()/65535), (Y2[3]*size().height()/65535)));
-    ellipse2->setPen(QPen(QColor(rouge[3], vert[3], bleu[3], master[3]), epais[3]));
+    ellipse2->setPen(QPen(QColor(rouge[3], vert[3], bleu[3], master[3]), epais[3],Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipse2->setTransformOriginPoint(ellipse2->boundingRect().center());
     ellipse2->setRotation(R[3]);
 
     pix->setTransformationMode(Qt::SmoothTransformation);
-    qreal xPix = X1[4]*size().width();
-    qreal yPix = Y1[4]*size().height();
-    qreal hPix = X2[4]*size().width()/127;
-    qreal vPix = Y2[4]*size().height()/127;
+    float xPix = X1[4]*size().width();
+    float yPix = Y1[4]*size().height();
+    float hPix = X2[4]*size().width()/127;
+    float vPix = Y2[4]*size().height()/127;
     pix->setOpacity(master[4]/255);
     QTransform trans;
     trans.setMatrix(hPix/65535,0,0,0,vPix/65535,0,xPix/65535,yPix/65535,1);
@@ -416,7 +409,12 @@ void WindowP::ligneUpdate() //drawings
     pix->setRotation(R[4]);
 }
 
-void WindowP::setupNetworkInterface() { //interface sACN
+void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
+    //OSC
+    udpSocket = new QUdpSocket(this);
+    udpSocket->bind(7003);
+    connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
+
     // Obtenir la liste de toutes les interfaces réseau
     QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
 
@@ -445,10 +443,10 @@ void WindowP::setupNetworkInterface() { //interface sACN
 
     // Code pour une distribution Linux inconnue
         //wifi :
-        QString interfaceName = "wlp3s0";
+        //QString interfaceName = "wlp3s0";
 
         //cable :
-        //QString interfaceName = "enp2s0f1";
+        QString interfaceName = "enp2s0f1";
 
     #endif
 
@@ -550,7 +548,7 @@ void WindowP::processDMXData() {
             if (channel < 197 && channel>=100) {
                 int level = dmxData[channel];
                 // traitement pour les 4 premiers canaux 8 bits
-                switch (i) {
+                if (!(level < 0)) switch (i) {
                 case 0: masterLevel(ch, level); break;
                 case 1: redSacn(ch, level); break;
                 case 2: greenSacn(ch, level); break;
@@ -569,7 +567,7 @@ void WindowP::processDMXData() {
                 int combinedValue = (highByte << 8) | lowByte;
                 //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
                 // traitement pour les canaux 16 bits
-                switch (i) {
+                if (!(highByte < 0)&&!(lowByte < 0))switch (i) {
                 case 4: pan(ch, combinedValue); break;
                 case 6: tilt(ch, combinedValue); break;
                 case 8: largeur(ch, combinedValue); break;
@@ -581,8 +579,8 @@ void WindowP::processDMXData() {
         }
 
             int level = dmxData[196];
-            qDebug() << "8-bit channel" << "196" << "level:" << level;
+            //qDebug() << "8-bit channel" << "196" << "level:" << level;
             // traitement pour ce canal 8 bits ici
-            pictureSacn(level);
+             if (!(level < 0)) pictureSacn(level);
     }
 }
