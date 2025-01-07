@@ -26,4 +26,4 @@ Pimax
 -194 195 : 16Bit 360° rotation
 -196 : load image : 11 ranges : 1 : no image, 2 : image1 .... 11 : image10
 
-in OSC respond to port 7003, initialy conceive for DLight light software
+in OSC respond to port 7003, initialy conceived for DLight lighting software
