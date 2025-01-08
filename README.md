@@ -1,6 +1,7 @@
 # Draw Rectangles and Elipses via Osc or sACN
 a small fullscreen app which draw 2 rectangles and 2 elipses (and a pixmap) in RGB via OSC or sACN
 in sACN, it responde to univers 7, channels :  
+
 First rectangle :  
 -100 : Master  
 -101 : R  
