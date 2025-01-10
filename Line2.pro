@@ -4,10 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT         += network
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT      += core gui
+QT      += network
+QT      += widgets
 
 
 TARGET = LineQt
@@ -22,7 +21,7 @@ SOURCES +=\
     sacn/ACNShare/ipaddr.cpp \
     sacn/ACNShare/tock.cpp \
     sacn/sacnlistener.cpp \
-    sacn/sacnsender.cpp \
+    #sacn/sacnsender.cpp \
     sacn/sacnsocket.cpp \
     sacn/sacnuniverselistmodel.cpp \
     sacn/streamcommon.cpp \
@@ -38,7 +37,7 @@ HEADERS  += mainwindow.h \
     sacn/ACNShare/tock.h \
     sacn/consts.h \
     sacn/sacnlistener.h \
-    sacn/sacnsender.h \
+    #sacn/sacnsender.h \
     sacn/sacnsocket.h \
     sacn/sacnuniverselistmodel.h \
     sacn/streamcommon.h \
