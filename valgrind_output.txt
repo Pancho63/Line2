@@ -1,0 +1,201 @@
+==1587== Memcheck, a memory error detector
+==1587== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==1587== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==1587== Command: ./Line
+==1587== 
+==1587== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==1587==    at 0x651FAE0: __writev (writev.c:26)
+==1587==    by 0x651FAE0: writev (writev.c:24)
+==1587==    by 0xA0AC573: ??? (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0ACE43: ??? (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0AE407: ??? (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0AE48B: xcb_wait_for_reply (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0x9E71893: QXcbConnection::initializeScreensFromMonitor(xcb_screen_iterator_t*, int, QXcbScreen**, bool) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E72E8F: QXcbConnection::initializeScreens(bool) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E6A1CB: QXcbConnection::QXcbConnection(QXcbNativeInterface*, bool, unsigned int, char const*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E8B5DF: QXcbIntegration::QXcbIntegration(QList<QString> const&, int&, char**) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E019D7: QXcbIntegrationPlugin::create(QString const&, QList<QString> const&, int&, char**) (in /usr/local/qt6/plugins/platforms/libqxcb.so)
+==1587==    by 0x544412F: init_platform(QString const&, QString const&, QString const&, int&, char**) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5446DE7: QGuiApplicationPrivate::createPlatformIntegration() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==  Address 0x9784b9d is 4,541 bytes inside a block of size 21,208 alloc'd
+==1587==    at 0x4889F94: calloc (vg_replace_malloc.c:1328)
+==1587==    by 0xA0ABF47: xcb_connect_to_fd (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0B05A7: xcb_connect_to_display_with_auth_info (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA1D35E3: _XConnectXCB (in /usr/lib/aarch64-linux-gnu/libX11.so.6.4.0)
+==1587==    by 0xA1C44AB: XOpenDisplay (in /usr/lib/aarch64-linux-gnu/libX11.so.6.4.0)
+==1587==    by 0x9E6EF7B: QXcbBasicConnection::QXcbBasicConnection(char const*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E6A0F3: QXcbConnection::QXcbConnection(QXcbNativeInterface*, bool, unsigned int, char const*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E8B5DF: QXcbIntegration::QXcbIntegration(QList<QString> const&, int&, char**) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E019D7: QXcbIntegrationPlugin::create(QString const&, QList<QString> const&, int&, char**) (in /usr/local/qt6/plugins/platforms/libqxcb.so)
+==1587==    by 0x544412F: init_platform(QString const&, QString const&, QString const&, int&, char**) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5446DE7: QGuiApplicationPrivate::createPlatformIntegration() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5447627: QGuiApplicationPrivate::createEventDispatcher() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==  Uninitialised value was created by a stack allocation
+==1587==    at 0x9F9AF5C: xcb_randr_get_monitors (in /usr/lib/aarch64-linux-gnu/libxcb-randr.so.0.1.0)
+==1587== 
+Running on an unknown Linux distribution
+Interface sélectionnée: "eth0"
+Creating Listener for universe  7
+Listener created for universe 7
+sACNListener 0xbc40000 : Starting universe 7
+sACNRxSocket  0xbc40000 : Bound to interface: "eth0"
+sACNRxSocket  0xbc40000 : Joining Multicast Group: "239.255.0.7"
+sACNRxSocket  0xbc40000 : Bound to IP: "192.168.1.110"
+sACNListener 0xbc40000 : Found new source name  Mac
+sACNListener 0xbc40000 : Source came back name  Mac
+==1587== Thread 4 Universe 7 RX:
+==1587== Conditional jump or move depends on uninitialised value(s)
+==1587==    at 0x146A3C: sACNListener::processDatagram(QByteArray, QHostAddress, QHostAddress) (in /home/pi/Line)
+==1587==    by 0x145E9F: sACNListener::readPendingDatagrams() (in /home/pi/Line)
+==1587==    by 0x116537: sACNListener::qt_static_metacall(QObject*, QMetaObject::Call, int, void**) (in /home/pi/Line)
+==1587==    by 0x5D8E2E7: void doActivate<false>(QObject*, int, void**) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x512C0EB: QAbstractSocketPrivate::canReadNotification() (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x5134E2F: QReadNotifier::event(QEvent*) (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x5D31BF3: QCoreApplication::notifyInternal2(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5FDBC23: socketNotifierSourceDispatch(_GSource*, int (*)(void*), void*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x691774B: g_main_context_dispatch (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x69179DF: ??? (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x6917A83: g_main_context_iteration (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==  Uninitialised value was created by a heap allocation
+==1587==    at 0x4885828: operator new(unsigned long) (vg_replace_malloc.c:422)
+==1587==    by 0x14672F: sACNListener::processDatagram(QByteArray, QHostAddress, QHostAddress) (in /home/pi/Line)
+==1587==    by 0x145E9F: sACNListener::readPendingDatagrams() (in /home/pi/Line)
+==1587==    by 0x116537: sACNListener::qt_static_metacall(QObject*, QMetaObject::Call, int, void**) (in /home/pi/Line)
+==1587==    by 0x5D8E2E7: void doActivate<false>(QObject*, int, void**) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x512C0EB: QAbstractSocketPrivate::canReadNotification() (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x5134E2F: QReadNotifier::event(QEvent*) (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x5D31BF3: QCoreApplication::notifyInternal2(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5FDBC23: socketNotifierSourceDispatch(_GSource*, int (*)(void*), void*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x691774B: g_main_context_dispatch (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x69179DF: ??? (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587== 
+==1587== Conditional jump or move depends on uninitialised value(s)
+==1587==    at 0x1470A0: sACNListener::performMerge() (in /home/pi/Line)
+==1587==    by 0x116543: sACNListener::qt_static_metacall(QObject*, QMetaObject::Call, int, void**) (in /home/pi/Line)
+==1587==    by 0x5D8E2E7: void doActivate<false>(QObject*, int, void**) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5D9CB9B: QTimer::timeout(QTimer::QPrivateSignal) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5D82933: QObject::event(QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x5D31BF3: QCoreApplication::notifyInternal2(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5EC41FB: QTimerInfoList::activateTimers() (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5FDA9AF: idleTimerSourceDispatch(_GSource*, int (*)(void*), void*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x691774B: g_main_context_dispatch (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x69179DF: ??? (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x6917A83: g_main_context_iteration (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==  Uninitialised value was created by a heap allocation
+==1587==    at 0x4885828: operator new(unsigned long) (vg_replace_malloc.c:422)
+==1587==    by 0x14672F: sACNListener::processDatagram(QByteArray, QHostAddress, QHostAddress) (in /home/pi/Line)
+==1587==    by 0x145E9F: sACNListener::readPendingDatagrams() (in /home/pi/Line)
+==1587==    by 0x116537: sACNListener::qt_static_metacall(QObject*, QMetaObject::Call, int, void**) (in /home/pi/Line)
+==1587==    by 0x5D8E2E7: void doActivate<false>(QObject*, int, void**) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x512C0EB: QAbstractSocketPrivate::canReadNotification() (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x5134E2F: QReadNotifier::event(QEvent*) (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x5D31BF3: QCoreApplication::notifyInternal2(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5FDBC23: socketNotifierSourceDispatch(_GSource*, int (*)(void*), void*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x691774B: g_main_context_dispatch (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x69179DF: ??? (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587== 
+sACNListener 0xbc40000 : Sampling has ended
+==1587== Thread 1:
+==1587== Syscall param writev(vector[...]) points to uninitialised byte(s)
+==1587==    at 0x651FAE0: __writev (writev.c:26)
+==1587==    by 0x651FAE0: writev (writev.c:24)
+==1587==    by 0xA0AC573: ??? (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0ACE43: ??? (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0AD8F7: xcb_flush (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0x9E83FF7: QXcbCursor::changeCursor(QCursor*, QWindow*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x54A943B: QWindowPrivate::applyCursor() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x54AFC17: QWindowPrivate::setCursor(QCursor const*) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x4AA87E7: qt_qpa_set_cursor(QWidget*, bool) [clone .part.0] (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4A6CBAF: QApplicationPrivate::dispatchEnterLeave(QWidget*, QWidget*, QPointF const&) [clone .part.0] (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4AD4D1B: QWidgetWindow::handleEnterLeaveEvent(QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4AD885B: QWidgetWindow::event(QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==  Address 0x9784bd6 is 4,598 bytes inside a block of size 21,208 alloc'd
+==1587==    at 0x4889F94: calloc (vg_replace_malloc.c:1328)
+==1587==    by 0xA0ABF47: xcb_connect_to_fd (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA0B05A7: xcb_connect_to_display_with_auth_info (in /usr/lib/aarch64-linux-gnu/libxcb.so.1.1.0)
+==1587==    by 0xA1D35E3: _XConnectXCB (in /usr/lib/aarch64-linux-gnu/libX11.so.6.4.0)
+==1587==    by 0xA1C44AB: XOpenDisplay (in /usr/lib/aarch64-linux-gnu/libX11.so.6.4.0)
+==1587==    by 0x9E6EF7B: QXcbBasicConnection::QXcbBasicConnection(char const*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E6A0F3: QXcbConnection::QXcbConnection(QXcbNativeInterface*, bool, unsigned int, char const*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E8B5DF: QXcbIntegration::QXcbIntegration(QList<QString> const&, int&, char**) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E019D7: QXcbIntegrationPlugin::create(QString const&, QList<QString> const&, int&, char**) (in /usr/local/qt6/plugins/platforms/libqxcb.so)
+==1587==    by 0x544412F: init_platform(QString const&, QString const&, QString const&, int&, char**) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5446DE7: QGuiApplicationPrivate::createPlatformIntegration() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5447627: QGuiApplicationPrivate::createEventDispatcher() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==  Uninitialised value was created by a heap allocation
+==1587==    at 0x48850C8: malloc (vg_replace_malloc.c:381)
+==1587==    by 0x9F515FF: xcb_image_create (in /usr/lib/aarch64-linux-gnu/libxcb-image.so.0.0.0)
+==1587==    by 0x9F525B3: xcb_image_native (in /usr/lib/aarch64-linux-gnu/libxcb-image.so.0.0.0)
+==1587==    by 0x9F52893: xcb_create_pixmap_from_bitmap_data (in /usr/lib/aarch64-linux-gnu/libxcb-image.so.0.0.0)
+==1587==    by 0x9E835DF: QXcbCursor::createNonStandardCursor(int) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E839C3: QXcbCursor::createFontCursor(int) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E8410F: QXcbCursor::changeCursor(QCursor*, QWindow*) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x54A943B: QWindowPrivate::applyCursor() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x54AFC17: QWindowPrivate::setCursor(QCursor const*) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x4AA87E7: qt_qpa_set_cursor(QWidget*, bool) [clone .part.0] (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4A6CBAF: QApplicationPrivate::dispatchEnterLeave(QWidget*, QWidget*, QPointF const&) [clone .part.0] (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x4AD4D1B: QWidgetWindow::handleEnterLeaveEvent(QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587== 
+Lost source  69820F27-5E60-49A5-B146-D8FDAACED715
+sACNListener 0xbc40000 : Source came back name  Mac
+Lost source  69820F27-5E60-49A5-B146-D8FDAACED715
+sACNListener 0xbc40000 : Source came back name  Mac
+Lost source  69820F27-5E60-49A5-B146-D8FDAACED715
+sACNListener 0xbc40000 : Source came back name  Mac
+Lost source  69820F27-5E60-49A5-B146-D8FDAACED715
+sACNListener 0xbc40000 : Source came back name  Mac
+Destroying Listener for universe  7
+sACNListener 0xbc40000 : stopping
+==1587== 
+==1587== HEAP SUMMARY:
+==1587==     in use at exit: 121,588 bytes in 1,005 blocks
+==1587==   total heap usage: 57,316 allocs, 56,311 frees, 716,143,086 bytes allocated
+==1587== 
+==1587== 336 bytes in 1 blocks are possibly lost in loss record 132 of 162
+==1587==    at 0x4889F94: calloc (vg_replace_malloc.c:1328)
+==1587==    by 0x400F3E3: calloc (rtld-malloc.h:44)
+==1587==    by 0x400F3E3: allocate_dtv (dl-tls.c:381)
+==1587==    by 0x400FDBF: _dl_allocate_tls (dl-tls.c:640)
+==1587==    by 0x64BF87B: allocate_stack (allocatestack.c:423)
+==1587==    by 0x64BF87B: pthread_create@@GLIBC_2.34 (pthread_create.c:650)
+==1587==    by 0x5EC5043: QThread::start(QThread::Priority) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x6A5EE23: QDBusConnectionManager::instance() (in /usr/local/qt6/lib/libQt6DBus.so.6.8.0)
+==1587==    by 0x6A55A77: QDBusConnection::sessionBus() (in /usr/local/qt6/lib/libQt6DBus.so.6.8.0)
+==1587==    by 0x58A9D27: QGenericUnixServices::QGenericUnixServices() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x9E8B39F: QXcbIntegration::QXcbIntegration(QList<QString> const&, int&, char**) (in /usr/local/qt6/lib/libQt6XcbQpa.so.6.8.0)
+==1587==    by 0x9E019D7: QXcbIntegrationPlugin::create(QString const&, QList<QString> const&, int&, char**) (in /usr/local/qt6/plugins/platforms/libqxcb.so)
+==1587==    by 0x544412F: init_platform(QString const&, QString const&, QString const&, int&, char**) (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587==    by 0x5446DE7: QGuiApplicationPrivate::createPlatformIntegration() (in /usr/local/qt6/lib/libQt6Gui.so.6.8.0)
+==1587== 
+==1587== 2,768 (2,688 direct, 80 indirect) bytes in 1 blocks are definitely lost in loss record 153 of 162
+==1587==    at 0x4885828: operator new(unsigned long) (vg_replace_malloc.c:422)
+==1587==    by 0x14672F: sACNListener::processDatagram(QByteArray, QHostAddress, QHostAddress) (in /home/pi/Line)
+==1587==    by 0x145E9F: sACNListener::readPendingDatagrams() (in /home/pi/Line)
+==1587==    by 0x116537: sACNListener::qt_static_metacall(QObject*, QMetaObject::Call, int, void**) (in /home/pi/Line)
+==1587==    by 0x5D8E2E7: void doActivate<false>(QObject*, int, void**) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x512C0EB: QAbstractSocketPrivate::canReadNotification() (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x5134E2F: QReadNotifier::event(QEvent*) (in /usr/local/qt6/lib/libQt6Network.so.6.8.0)
+==1587==    by 0x4A6539F: QApplicationPrivate::notify_helper(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Widgets.so.6.8.0)
+==1587==    by 0x5D31BF3: QCoreApplication::notifyInternal2(QObject*, QEvent*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x5FDBC23: socketNotifierSourceDispatch(_GSource*, int (*)(void*), void*) (in /usr/local/qt6/lib/libQt6Core.so.6.8.0)
+==1587==    by 0x691774B: g_main_context_dispatch (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587==    by 0x69179DF: ??? (in /usr/lib/aarch64-linux-gnu/libglib-2.0.so.0.7400.6)
+==1587== 
+==1587== LEAK SUMMARY:
+==1587==    definitely lost: 2,688 bytes in 1 blocks
+==1587==    indirectly lost: 80 bytes in 2 blocks
+==1587==      possibly lost: 336 bytes in 1 blocks
+==1587==    still reachable: 118,484 bytes in 1,001 blocks
+==1587==                       of which reachable via heuristic:
+==1587==                         newarray           : 456 bytes in 3 blocks
+==1587==         suppressed: 0 bytes in 0 blocks
+==1587== Reachable blocks (those to which a pointer was found) are not shown.
+==1587== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==1587== 
+==1587== For lists of detected and suppressed errors, rerun with: -s
+==1587== ERROR SUMMARY: 436 errors from 6 contexts (suppressed: 0 from 0)
