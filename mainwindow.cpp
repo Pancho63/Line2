@@ -444,10 +444,10 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
     // Code pour une distribution Linux inconnue
         //wifi :
-        QString interfaceName = "wlp3s0";
+       // QString interfaceName = "wlp3s0";
 
         //cable :
-        //QString interfaceName = "enp2s0f1";
+        QString interfaceName = "enp2s0f1";
 
     #endif
 
@@ -516,16 +516,13 @@ void WindowP::onLevelsChanged() //update sACN -> dmx levels
     //qDebug() << "Slot onLevelsChanged called!";
 
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
-    for (int channel = 99; channel < 197; ++channel) {
+    for (int channel = 99; channel < 197; ++channel)
+            {
 
-        if (channel < 197) {
             if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
                 dmxData[channel+1] = listener->mergedLevels()[channel].level;
-            } else {
-                qWarning() << "Channel index out of bounds:" << channel;
+            } else {qWarning() << "Channel index out of bounds:" << channel;}
             }
-        }
-    }
     //qDebug() << "tableau mis à jour";
     processDMXData();
 }
