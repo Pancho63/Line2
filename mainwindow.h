@@ -68,6 +68,9 @@ private:
     QGraphicsScene *scene;
     QGraphicsView *view;
 
+    QTimer *dmxTimer;
+    bool dmxDataChanged; // Flag to indicate if DMX data has changed
+
 private slots:
     void processPendingDatagrams();
 
@@ -90,6 +93,7 @@ private slots:
 
 public slots:
      void onLevelsChanged();
+     void checkAndProcessDMXData();
 
 };
 

@@ -23,6 +23,11 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
     setupNetworkInterfaces();
 
+    // Initialize the timer
+    dmxTimer = new QTimer(this);
+    connect(dmxTimer, &QTimer::timeout, this, &WindowP::checkAndProcessDMXData);
+    dmxTimer->start(10); // 100 milliseconds = 1/10 second
+
     view  = new QGraphicsView(this) ;
     scene = new QGraphicsScene(this);
     view->setScene(scene);
@@ -515,7 +520,24 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 void WindowP::onLevelsChanged() //update sACN -> dmx levels
 {
     //qDebug() << "Slot onLevelsChanged called!";
-
+    // Update the dmxData array with the new values
+    bool dataChanged = false;
+    for (int channel = 99; channel < 197; ++channel)
+    {
+        if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
+            int newLevel = listener->mergedLevels()[channel].level;
+            if (dmxData[channel+1] != newLevel) {
+                dmxData[channel+1] = newLevel;
+                dataChanged = true;
+            }
+        } else {
+            qWarning() << "Channel index out of bounds:" << channel;
+        }
+    }
+    // Set the flag if any data has changed
+    if (dataChanged) {
+        dmxDataChanged = true;
+    }
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
     for (int channel = 99; channel < 197; ++channel)
             {
@@ -581,5 +603,11 @@ void WindowP::processDMXData() {
             //qDebug() << "8-bit channel" << "196" << "level:" << level;
             // traitement pour ce canal 8 bits ici
              if (!(level < 0)) pictureSacn(level);
+    }
+}
+void WindowP::checkAndProcessDMXData() {
+    if (dmxDataChanged) {
+        processDMXData();
+        dmxDataChanged = false; // Reset the flag after processing
     }
 }
