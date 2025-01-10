@@ -17,9 +17,9 @@
 #include <QDebug>
 #include <QNetworkInterface>
 #include "streamingacn.h"
-#include "streamcommon.h"
+//#include "streamcommon.h"
 #include "ACNShare/ipaddr.h"
-#include "sacnsocket.h"
+//#include "sacnsocket.h"
 #include "consts.h"
 
 sACNUniverseInfo::sACNUniverseInfo(int u)
@@ -75,7 +75,7 @@ void sACNUniverseListModel::setStartUniverse(int start)
         m_universes << new sACNUniverseInfo(universe);
 
         // Add the existing sources
-        for(int i=0; i<m_listeners.back()->sourceCount(); i++)
+        for (std::size_t i = 0; i < m_listeners.back()->sourceCount(); i++)
         {
             modelindex_locker.unlock();
             sourceOnline(m_listeners.back()->source(i));

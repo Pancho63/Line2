@@ -60,7 +60,7 @@ void sACNListener::startReception()
     qDebug() << "sACNListener" << QThread::currentThreadId() << ": Starting universe" << m_universe;
 
     // Clear the levels array
-    memset(&m_last_levels, -1, 512);
+    memset(&m_last_levels, -1, 512 * sizeof(m_last_levels[0]));
 
     // Listen multicast
     m_sockets.push_back(new sACNRxSocket());
@@ -141,22 +141,16 @@ void sACNListener::readPendingDatagrams()
     #endif
 
     // Check all sockets
-    foreach (sACNRxSocket* m_socket, m_sockets)
-    {
-        while(m_socket->hasPendingDatagrams())
-        {
+    for (sACNRxSocket* m_socket : m_sockets) {
+        while (m_socket->hasPendingDatagrams()) {
             QByteArray data;
             data.resize(m_socket->pendingDatagramSize());
             QHostAddress sender;
             quint16 senderPort;
 
-            m_socket->readDatagram(data.data(), data.size(),
-                                    &sender, &senderPort);
+            m_socket->readDatagram(data.data(), data.size(), &sender, &senderPort);
 
-            processDatagram(
-                        data,
-                        m_socket->localAddress(),
-                        sender);
+            processDatagram(data, m_socket->localAddress(), sender);
         }
     }
 }
