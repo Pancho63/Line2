@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include <QScreen>
 
 int         iarg;
 int         iarg2;
@@ -24,7 +23,7 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
     setupNetworkInterfaces();
 
-    view = new QGraphicsView(this);
+    view  = new QGraphicsView(this) ;
     scene = new QGraphicsScene(this);
     view->setScene(scene);
     showFullScreen();
@@ -33,10 +32,10 @@ WindowP::WindowP() :    QWidget(), dmxData(512, 0)
     // Récupérer la définition de l'écran
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
-    view->setSceneRect(screenGeometry);  // Définir la taille de la scène
+    view->setSceneRect(screenGeometry);  // Définir la taille de la vue
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
-    // y adapter la vue
+
     view->setFixedWidth(screenWidth);
     view->setFixedHeight(screenHeight);
 
@@ -93,16 +92,16 @@ while (udpSocket->hasPendingDatagrams()) {
     while (pr.isOk() && (msg = pr.popMessage()) != 0) {
 
         if ((msg->match("/circ/level").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())         &&(channel<=iarg && iarg<=(channel+4)))   {masterLevel(iarg, iarg2);}
-        if ((msg->match("/device/FOCUS/PAN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {pan(iarg, iarg2);}
-        if ((msg->match("/device/FOCUS/TILT").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {tilt (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/IRIS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {largeur  (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/FOCUS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {hauteur (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/FROST").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {rotate(iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/RED").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {red  (iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/GREEN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())&&(channel<=iarg && iarg<=(channel+4)))   {green(iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/BLUE").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(channel<=iarg && iarg<=(channel+4)))   {blue (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/ZOOM").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {thickness(iarg, iarg2);}
-        if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))                       {picture(iarg2);}
+        if ((msg->match("/device/FOCUS/PAN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {pan        (iarg, iarg2);}
+        if ((msg->match("/device/FOCUS/TILT").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {tilt       (iarg, iarg2);}
+        if ((msg->match("/device/BEAM/IRIS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {largeur    (iarg, iarg2);}
+        if ((msg->match("/device/BEAM/FOCUS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {hauteur    (iarg, iarg2);}
+        if ((msg->match("/device/BEAM/FROST").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {rotate     (iarg, iarg2);}
+        if ((msg->match("/device/COLOUR/RED").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {red        (iarg, iarg2);}
+        if ((msg->match("/device/COLOUR/GREEN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())&&(channel<=iarg && iarg<=(channel+4)))   {green      (iarg, iarg2);}
+        if ((msg->match("/device/COLOUR/BLUE").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(channel<=iarg && iarg<=(channel+4)))   {blue       (iarg, iarg2);}
+        if ((msg->match("/device/BEAM/ZOOM").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {thickness  (iarg, iarg2);}
+        if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))                       {picture    (iarg2);}
            }
 }
 }
@@ -111,8 +110,8 @@ while (udpSocket->hasPendingDatagrams()) {
 void WindowP::masterLevel (int ch, int value)
 {
     //qDebug()<<"level"<<value;
-if (value>=0) master[ch-channel] = value;
-ligneUpdate();
+    if (value>=0) master[ch-channel] = value;
+    ligneUpdate();
 }
 
 void WindowP::redSacn(int ch, int value)
@@ -299,7 +298,7 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
 
     } else if (level >= 23 && level < 46) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
-        if (pict.isNull()) {qDebug() <<"gobo 1 null " << (QCoreApplication::applicationDirPath() + "/imageLine/1.png"); return;}
+        if (pict.isNull()) return;
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
         //scene->addItem(pix);
@@ -387,7 +386,7 @@ void WindowP::ligneUpdate() //drawings
     rect2->setTransformOriginPoint(rect2->boundingRect().center());
     rect2->setRotation(R[1]);
 
-    ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65535)-X2[2]*size().width()/65535), (Y1[2]*size().height()/65535), (X2[2]*size().width()/65535), (Y2[2]*size().height()/65535)));
+    ellipse1->setRect(QRectF((X1[2]*size().width()/65535), 2*((size().height()-Y1[2]*size().height()/65535)-Y2[2]*size().height()/65535), (2*X2[2]*size().width()/65535), (2*Y2[2]*size().height()/65535)));
     ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
     ellipse1->setRotation(R[2]);
@@ -444,7 +443,7 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
     // Code pour une distribution Linux inconnue
         //wifi :
-       // QString interfaceName = "wlp3s0";
+       //QString interfaceName = "wlp3s0";
 
         //cable :
         QString interfaceName = "enp2s0f1";

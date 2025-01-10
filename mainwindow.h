@@ -32,6 +32,7 @@
 #include <QDebug>
 #include <QKeyEvent>
 #include <QShortcut>
+#include <QScreen>
 
 
 using namespace oscpkt;
@@ -51,21 +52,21 @@ private:
     QUdpSocket  *udpSocket;
     QNetworkInterface interface;
     QSharedPointer<sACNListener> listener;
+
     void setupNetworkInterfaces();
     void processDMXData();
 
     QVector<int> dmxData;
+
     QGraphicsRectItem *rect1;
     QGraphicsEllipseItem *ellipse1;
     QGraphicsRectItem *rect2;
     QGraphicsEllipseItem *ellipse2;
-    QGraphicsScene *scene;
     QGraphicsPixmapItem *pix;
+
     QPixmap pict;
-
+    QGraphicsScene *scene;
     QGraphicsView *view;
-
-//    VideoProj *videoproj;
 
 private slots:
     void processPendingDatagrams();
