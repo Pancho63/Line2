@@ -87,7 +87,7 @@ public slots:
     void pictureSacn(int);
     void processDMXData();
 
-     void onLevelsChanged();
+     //void onLevelsChanged();
      void checkAndProcessDMXData();
 
 };

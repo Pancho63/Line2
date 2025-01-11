@@ -12,7 +12,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     return size * nmemb;
 }
 
-DMXReceiver::DMXReceiver(QObject *parent) : QObject(parent), dmxData(512, 0) {
+DMXReceiver::DMXReceiver(QObject *parent, WindowP *window) : QObject(parent), dmxData(512, 0), windowPInstance(window) {
     // Initialiser cURL globalement
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -27,11 +27,10 @@ DMXReceiver::~DMXReceiver() {
     }
     curl_global_cleanup();
 }
-
 void DMXReceiver::updateDMX() {
     if (!curl) return;
 
-    std::string url = "http://localhost:9090/get_dmx?u=1";
+    std::string url = "http://localhost:9090/get_dmx?u=7";
     std::string response_string;
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -50,8 +49,7 @@ void DMXReceiver::updateDMX() {
                 auto dmx_values = j["dmx"].get<std::vector<int>>();
                 std::copy(dmx_values.begin(), dmx_values.end(), dmxData.begin());
                 std::cout << "Données DMX mises à jour." << std::endl;
-                WindowP::processDMXData();
-
+                windowPInstance->processDMXData();
             }
         } catch (const json::exception& e) {
             std::cerr << "Erreur lors de l'analyse du JSON: " << e.what() << std::endl;
