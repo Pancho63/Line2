@@ -1,0 +1,4 @@
+#ifndef DMXRECEIVER_H
+#define DMXRECEIVER_H
+
+#endif // DMXRECEIVER_H

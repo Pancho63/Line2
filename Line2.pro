@@ -14,6 +14,7 @@ TEMPLATE = app
 
 
 SOURCES +=\
+    dmxreceiver.cpp \
     main.cpp \
     mainwindow.cpp \
     sacn/ACNShare/CID.cpp \
@@ -28,6 +29,7 @@ SOURCES +=\
     sacn/streamingacn.cpp
 
 HEADERS  += mainwindow.h \
+    dmxreceiver.h \
     oscpkt.hh \
     sacn/ACNShare/CID.h \
     sacn/ACNShare/VHD.h \
