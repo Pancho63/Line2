@@ -21,6 +21,7 @@ private:
     CURL* curl;
     std::vector<int> dmxData; // Tableau pour stocker les données DMX
      WindowP* windowPInstance;
+    QTimer* dmxTimer; // Ajout du QTimer
 };
 
 #endif // DMXRECEIVER_H

@@ -3,6 +3,8 @@
 #include "dmxreceiver.h"
 #include <include/json.hpp>
 #include <mainwindow.h>
+#include <QTimer>
+
 
 using json = nlohmann::json;
 
@@ -19,6 +21,11 @@ DMXReceiver::DMXReceiver(QObject *parent, WindowP *window) : QObject(parent), dm
     if (!curl) {
         std::cerr << "Erreur lors de l'initialisation de cURL" << std::endl;
     }
+
+    // Initialiser et configurer le QTimer
+    dmxTimer = new QTimer(this);
+    connect(dmxTimer, &QTimer::timeout, this, &DMXReceiver::updateDMX);
+    dmxTimer->start(200); // Déclencher updateDMX toutes les 200 ms
 }
 
 DMXReceiver::~DMXReceiver() {

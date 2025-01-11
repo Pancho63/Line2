@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "dmxreceiver.h"
+//#include "dmxreceiver.h"
 
 int         iarg;
 int         iarg2;
@@ -442,6 +442,7 @@ void WindowP::processDMXData() {
             if (channel < 197 && channel>=100) {
                 int level = dmxData[channel];
                 // traitement pour les 4 premiers canaux 8 bits
+                qDebug() << "ch " << channel << "level " << level;
                 if (!(level < 0)) switch (i) {
                     case 0: masterLevel(ch, level); break;
                     case 1: redSacn(ch, level); break;
