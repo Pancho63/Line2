@@ -25,7 +25,7 @@ DMXReceiver::DMXReceiver(QObject *parent, WindowP *window) : QObject(parent), dm
     // Initialiser et configurer le QTimer
     dmxTimer = new QTimer(this);
     connect(dmxTimer, &QTimer::timeout, this, &DMXReceiver::updateDMX);
-    dmxTimer->start(200); // Déclencher updateDMX toutes les 200 ms
+    dmxTimer->start(50); // Déclencher updateDMX toutes les 200 ms
 }
 
 DMXReceiver::~DMXReceiver() {
@@ -48,15 +48,29 @@ void DMXReceiver::updateDMX() {
     if (res != CURLE_OK) {
         std::cerr << "Erreur lors de la récupération des données : " << curl_easy_strerror(res) << std::endl;
     } else {
+        // std::cout << "Données reçues : " << response_string << std::endl; // Ajouter un log pour les données reçues
         try {
             // Analyser la réponse JSON
             auto j = json::parse(response_string);
             if (j.contains("dmx")) {
-                // Extraire les valeurs DMX et les stocker dans le tableau
+                // Extraire les valeurs DMX et les transformer
                 auto dmx_values = j["dmx"].get<std::vector<int>>();
-                std::copy(dmx_values.begin(), dmx_values.end(), dmxData.begin());
-                std::cout << "Données DMX mises à jour." << std::endl;
-                windowPInstance->processDMXData();
+                std::vector<int> filtered_values;
+                for (size_t i = 99; i <= 197; ++i) {
+                    if (i < dmx_values.size()) {
+                        filtered_values.push_back(dmx_values[i]);
+                    }
+                }
+
+                /*std::cout << "Données DMX filtrées et transformées : ";
+                for (const auto& val : filtered_values) {
+                    std::cout << val << " ";
+                }
+                std::cout << std::endl;*/
+
+                if (windowPInstance) {
+
+                windowPInstance->updateDMXData(filtered_values);}
             }
         } catch (const json::exception& e) {
             std::cerr << "Erreur lors de l'analyse du JSON: " << e.what() << std::endl;

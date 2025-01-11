@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+//#include <iostream>
 //#include "dmxreceiver.h"
 
 int         iarg;
@@ -17,10 +18,11 @@ qreal       epais[5]=     {0, 0, 0, 0, 0};
 int         channel =     61;
 
 
-WindowP::WindowP() :    QWidget(), dmxData(512, 0)
+WindowP::WindowP() :    QWidget()
 
 {   //initialisations
-
+    dmxData.resize(512, 0); // Initialiser dmxData avec 512 valeurs de 0
+    previousDMXData.resize(512, 0); // Initialiser previousDMXData
     setupNetworkInterfaces();
 
     view  = new QGraphicsView(this) ;
@@ -415,41 +417,57 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
 }
 
-
-void WindowP::checkAndProcessDMXData() {
-    if (dmxDataChanged) {
-        processDMXData();
-        dmxDataChanged = false; // Reset the flag after processing
+void WindowP::updateDMXData(const std::vector<int>& newData) {
+    dmxData.clear();
+    for (size_t i = 0; i < newData.size(); ++i) {
+        dmxData.push_back(newData[i]); // Copier les valeurs sans modification
     }
-}
 
+    // Log the values to check if they are correctly copied
+   /* std::cout << "Valeurs copiées dans updateDMXData: ";
+    for (const auto& val : dmxData) {
+        std::cout << val << " ";
+    }
+    std::cout << std::endl;*/
+
+    processDMXData(); // Traiter les nouvelles données après la mise à jour
+
+    // Mettre à jour previousDMXData avec les nouvelles valeurs
+    previousDMXData = dmxData;
+}
 void WindowP::processDMXData() {
+    // Affichage des valeurs
+   /* for (int i = 0; i < dmxData.size(); ++i) {
+        std::cout << "Channel " << i << " Value: " << dmxData[i] << std::endl; // Afficher le numéro de canal et la valeur
+    }*/
+
     // Traiter les données DMX pour les canaux entre 100 et 199
-    for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
+    for (int baseChannel = 0; baseChannel < 100; baseChannel += 20) {
         // Définir les valeurs de `ch` en fonction de baseChannel
         int ch = 0;
         switch (baseChannel) {
-        case 100: ch = 61; break;
-        case 120: ch = 62; break;
-        case 140: ch = 63; break;
-        case 160: ch = 64; break;
-        case 180: ch = 65; break;
+        case 0: ch = 61; break;
+        case 20: ch = 62; break;
+        case 40: ch = 63; break;
+        case 60: ch = 64; break;
+        case 80: ch = 65; break;
         }
 
         // Traiter les canaux 8 bits (100-103, 120-123, 140-143, etc.)
         for (int i = 0; i < 4; ++i) {
             int channel = baseChannel + i;
-            if (channel < 197 && channel>=100) {
+            if (channel < 97 && channel>=0) {
                 int level = dmxData[channel];
+                if (level != previousDMXData[channel]) { // Traiter seulement si la valeur a changé
                 // traitement pour les 4 premiers canaux 8 bits
-                qDebug() << "ch " << channel << "level " << level;
+                //qDebug() << "ch " << channel << "level " << level;
                 if (!(level < 0)) switch (i) {
                     case 0: masterLevel(ch, level); break;
                     case 1: redSacn(ch, level); break;
                     case 2: greenSacn(ch, level); break;
                     case 3: blueSacn(ch, level); break;
                     }
-            }
+            }}
         }
 
         // Traiter les canaux 16 bits (104-116, 124-136, 144-156, etc.)
@@ -460,8 +478,8 @@ void WindowP::processDMXData() {
                 int highByte = dmxData[highChannel];
                 int lowByte = dmxData[lowChannel];
                 int combinedValue = (highByte << 8) | lowByte;
-                //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
-                // traitement pour les canaux 16 bits
+                int previousCombinedValue = (previousDMXData[highChannel] << 8) | previousDMXData[lowChannel];
+                if (combinedValue != previousCombinedValue) { // Traiter seulement si la valeur a changé
                 if (!(highByte < 0)&&!(lowByte < 0))switch (i) {
                     case 4: pan(ch, combinedValue); break;
                     case 6: tilt(ch, combinedValue); break;
@@ -469,13 +487,14 @@ void WindowP::processDMXData() {
                     case 10: hauteur(ch, combinedValue); break;
                     case 12: thickness(ch, combinedValue); break;
                     case 14: rotate(ch, combinedValue); break;
-                    }
+                    }}
             }
         }
 
-        int level = dmxData[196];
+        int level = dmxData[96];
         //qDebug() << "8-bit channel" << "196" << "level:" << level;
         // traitement pour ce canal 8 bits ici
         if (!(level < 0)) pictureSacn(level);
+
     }
 }

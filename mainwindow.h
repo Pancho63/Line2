@@ -26,6 +26,7 @@
 #include <QKeyEvent>
 #include <QShortcut>
 #include <QScreen>
+#include <QVector>
 
 
 using namespace oscpkt;
@@ -37,6 +38,7 @@ class WindowP : public QWidget
 
 public:
      WindowP();
+     void updateDMXData(const std::vector<int>& newData);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -49,6 +51,7 @@ private:
 
 
     QVector<int> dmxData;
+    QVector<int> previousDMXData; // Ajouter un vecteur pour stocker les valeurs précédentes
 
     QGraphicsRectItem *rect1;
     QGraphicsEllipseItem *ellipse1;
@@ -60,7 +63,6 @@ private:
     QGraphicsScene *scene;
     QGraphicsView *view;
 
-    bool dmxDataChanged; // Flag to indicate if DMX data has changed
 
 private slots:
     void processPendingDatagrams();
@@ -88,7 +90,7 @@ public slots:
     void processDMXData();
 
      //void onLevelsChanged();
-     void checkAndProcessDMXData();
+     //void checkAndProcessDMXData();
 
 };
 
