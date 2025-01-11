@@ -25,7 +25,7 @@ DMXReceiver::DMXReceiver(QObject *parent, WindowP *window) : QObject(parent), dm
     // Initialiser et configurer le QTimer
     dmxTimer = new QTimer(this);
     connect(dmxTimer, &QTimer::timeout, this, &DMXReceiver::updateDMX);
-    dmxTimer->start(50); // Déclencher updateDMX toutes les 200 ms
+    dmxTimer->start(60); // Déclencher updateDMX toutes les 200 ms
 }
 
 DMXReceiver::~DMXReceiver() {
