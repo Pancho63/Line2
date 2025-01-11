@@ -4,13 +4,6 @@
 #include <QUdpSocket>
 #include <QNetworkInterface>
 #include "oscpkt.hh"
-#include "sacn/ACNShare/CID.h"
-#include "sacn/ACNShare/VHD.h"
-#include "sacn/ACNShare/defpack.h"
-#include "sacn/ACNShare/ipaddr.h"
-#include "sacn/ACNShare/tock.h"
-#include "sacn/sacnlistener.h"
-#include "sacn/streamingacn.h"
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -51,10 +44,9 @@ protected:
 private:
     QUdpSocket  *udpSocket;
     QNetworkInterface interface;
-    QSharedPointer<sACNListener> listener;
 
     void setupNetworkInterfaces();
-    void processDMXData();
+
 
     QVector<int> dmxData;
 
@@ -68,12 +60,16 @@ private:
     QGraphicsScene *scene;
     QGraphicsView *view;
 
-    QTimer *dmxTimer;
     bool dmxDataChanged; // Flag to indicate if DMX data has changed
 
 private slots:
     void processPendingDatagrams();
 
+
+
+    void ligneUpdate();
+
+public slots:
     void masterLevel(int, int);
     void pan(int, int);
     void tilt(int, int);
@@ -89,9 +85,8 @@ private slots:
     void thickness(int, int);
     void picture(int);
     void pictureSacn(int);
-    void ligneUpdate();
+    void processDMXData();
 
-public slots:
      void onLevelsChanged();
      void checkAndProcessDMXData();
 

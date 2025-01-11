@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "dmxreceiver.h"
 
 int         iarg;
 int         iarg2;
@@ -15,18 +16,12 @@ qreal       bleu[5]=      {0, 0, 0, 0, 0};
 qreal       epais[5]=     {0, 0, 0, 0, 0};
 int         channel =     61;
 
-QSharedPointer<sACNListener> listener;
 
 WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
 {   //initialisations
 
     setupNetworkInterfaces();
-
-    // Initialize the timer
-    dmxTimer = new QTimer(this);
-    connect(dmxTimer, &QTimer::timeout, this, &WindowP::checkAndProcessDMXData);
-    dmxTimer->start(10); // 100 milliseconds = 1/10 second
 
     view  = new QGraphicsView(this) ;
     scene = new QGraphicsScene(this);
@@ -195,8 +190,6 @@ void WindowP::picture(int value)
     QString path = (QCoreApplication::applicationDirPath() + "/imageLine/");
     QDir dir(path);
     if (!dir.exists()) {dir.mkpath(".");}
-
-    //scene->removeItem(pix);
 
 
     switch (value)
@@ -420,134 +413,14 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     udpSocket->bind(7003);
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
 
-    // Obtenir la liste de toutes les interfaces réseau
-    QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
-
-    // Spécifiez le nom de l'interface réseau que vous souhaitez utiliser
-    // Actions spécifiques en fonction du système d'exploitation
-
-    #if defined(Q_OS_MACOS)
-        qDebug() << "Running on macOS";
-    // Code spécifique à macOS
-        QString interfaceName = "en0";
-
-    #elif defined(Q_OS_LINUX)
-    //  vérifications supplémentaires pour Ubuntu et Raspbian
-
-    #if __has_include(<Ubuntu-specific-header.h>)
-        qDebug() << "Running on Ubuntu";
-        // Code spécifique à Ubuntu
-    QString interfaceName = "enp2s0f1";
-
-    #elif __has_include(<Raspbian-specific-header.h>)
-        qDebug() << "Running on Raspbian";
-        // Code spécifique à Raspbian
-        //QString interfaceName = "";
-    #else
-        qDebug() << "Running on an unknown Linux distribution";
-
-    // Code pour une distribution Linux inconnue
-        //wifi :
-       QString interfaceName = "wlp3s0";
-
-        //cable :
-        //QString interfaceName = "enp2s0f1";
-        //rasp :
-        //QString interfaceName = "eth0";
-
-    #endif
-
-
-
-    #elif defined(Q_OS_WIN)
-        qDebug() << "Running on Windows";
-        // Code spécifique à Windows
-        //QString interfaceName = "";
-    #else
-        qDebug() << "Running on an unsupported OS";
-        // Code pour un système d'exploitation non supporté
-        //QString interfaceName = "";
-    #endif
-
-    QNetworkInterface selectedInterface;
-
-    // Trouvez l'interface réseau par son nom
-    foreach (const QNetworkInterface &interface, interfaces) {
-        if (interface.humanReadableName() == interfaceName) {
-            selectedInterface = interface;
-            break;
-        }
-    }
-
-    // Utiliser l'interface sélectionnée avec sACNRxSocket
-    if (selectedInterface.isValid()) {
-        qDebug() << "Interface sélectionnée:" << selectedInterface.humanReadableName();
-
-        // Créez une instance de sACNRxSocket
-        sACNRxSocket rxSocket;
-
-        // Définir l'interface réseau
-        rxSocket.setNetworkInterface(selectedInterface);
-
-        // Continuez avec les autres opérations sur rxSocket
-        int universe = 7;  // universe in range 1-63999
-        listener = sACNManager::getInstance()->getListener(universe);
-        if (listener) {
-            connect(listener.data(), SIGNAL(levelsChanged()), this, SLOT(onLevelsChanged()));
-            qDebug() << "Listener created for universe" << universe;
-        } else {
-            qDebug() << "Failed to create listener for universe" << universe;
-        }
-    } else {
-        qDebug() << "Interface non trouvée.";
-        // Iterate through the list of interfaces and print their details
-        for (const QNetworkInterface &interface : interfaces) {
-            qDebug() << "Interface Name:" << interface.humanReadableName();
-            qDebug() << "Hardware Address:" << interface.hardwareAddress();
-
-            // Get all IP addresses associated with this interface
-            QList<QNetworkAddressEntry> entries = interface.addressEntries();
-            for (const QNetworkAddressEntry &entry : entries) {
-                qDebug() << "IP Address:" << entry.ip().toString();
-                qDebug() << "Netmask:" << entry.netmask().toString();
-                qDebug() << "Broadcast:" << entry.broadcast().toString();
-            }
-            qDebug() << "--------------------------------------";
-        }
-    }
 }
 
-void WindowP::onLevelsChanged() //update sACN -> dmx levels
-{
-    //qDebug() << "Slot onLevelsChanged called!";
-    // Update the dmxData array with the new values
-    bool dataChanged = false;
-    for (int channel = 99; channel < 197; ++channel)
-    {
-        if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
-            int newLevel = listener->mergedLevels()[channel].level;
-            if (dmxData[channel+1] != newLevel) {
-                dmxData[channel+1] = newLevel;
-                dataChanged = true;
-            }
-        } else {
-            qWarning() << "Channel index out of bounds:" << channel;
-        }
-    }
-    // Set the flag if any data has changed
-    if (dataChanged) {
-        dmxDataChanged = true;
-    }
-    // Mettre à jour le tableau dmxData avec les nouvelles valeurs
-    for (int channel = 99; channel < 197; ++channel)
-            {
 
-            if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
-                dmxData[channel+1] = listener->mergedLevels()[channel].level;
-            } else {qWarning() << "Channel index out of bounds:" << channel;}
-            }
-    //qDebug() << "tableau mis à jour";
-    processDMXData();
+void WindowP::checkAndProcessDMXData() {
+    if (dmxDataChanged) {
+        processDMXData();
+        dmxDataChanged = false; // Reset the flag after processing
+    }
 }
 
 void WindowP::processDMXData() {
@@ -570,11 +443,11 @@ void WindowP::processDMXData() {
                 int level = dmxData[channel];
                 // traitement pour les 4 premiers canaux 8 bits
                 if (!(level < 0)) switch (i) {
-                case 0: masterLevel(ch, level); break;
-                case 1: redSacn(ch, level); break;
-                case 2: greenSacn(ch, level); break;
-                case 3: blueSacn(ch, level); break;
-                }
+                    case 0: masterLevel(ch, level); break;
+                    case 1: redSacn(ch, level); break;
+                    case 2: greenSacn(ch, level); break;
+                    case 3: blueSacn(ch, level); break;
+                    }
             }
         }
 
@@ -589,25 +462,19 @@ void WindowP::processDMXData() {
                 //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
                 // traitement pour les canaux 16 bits
                 if (!(highByte < 0)&&!(lowByte < 0))switch (i) {
-                case 4: pan(ch, combinedValue); break;
-                case 6: tilt(ch, combinedValue); break;
-                case 8: largeur(ch, combinedValue); break;
-                case 10: hauteur(ch, combinedValue); break;
-                case 12: thickness(ch, combinedValue); break;
-                case 14: rotate(ch, combinedValue); break;
-                }
+                    case 4: pan(ch, combinedValue); break;
+                    case 6: tilt(ch, combinedValue); break;
+                    case 8: largeur(ch, combinedValue); break;
+                    case 10: hauteur(ch, combinedValue); break;
+                    case 12: thickness(ch, combinedValue); break;
+                    case 14: rotate(ch, combinedValue); break;
+                    }
             }
         }
 
-            int level = dmxData[196];
-            //qDebug() << "8-bit channel" << "196" << "level:" << level;
-            // traitement pour ce canal 8 bits ici
-             if (!(level < 0)) pictureSacn(level);
-    }
-}
-void WindowP::checkAndProcessDMXData() {
-    if (dmxDataChanged) {
-        processDMXData();
-        dmxDataChanged = false; // Reset the flag after processing
+        int level = dmxData[196];
+        //qDebug() << "8-bit channel" << "196" << "level:" << level;
+        // traitement pour ce canal 8 bits ici
+        if (!(level < 0)) pictureSacn(level);
     }
 }
