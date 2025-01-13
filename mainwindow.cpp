@@ -1,6 +1,5 @@
 #include "mainwindow.h"
-//#include <iostream>
-//#include "dmxreceiver.h"
+#include <QScreen>
 
 int         iarg;
 int         iarg2;
@@ -17,15 +16,15 @@ qreal       bleu[5]=      {0, 0, 0, 0, 0};
 qreal       epais[5]=     {0, 0, 0, 0, 0};
 int         channel =     61;
 
+QSharedPointer<sACNListener> listener;
 
-WindowP::WindowP() :    QWidget()
+WindowP::WindowP() :    QWidget(), dmxData(512, 0)
 
 {   //initialisations
-    dmxData.resize(512, 0); // Initialiser dmxData avec 512 valeurs de 0
-    previousDMXData.resize(512, 0); // Initialiser previousDMXData
+
     setupNetworkInterfaces();
 
-    view  = new QGraphicsView(this) ;
+    view = new QGraphicsView(this);
     scene = new QGraphicsScene(this);
     view->setScene(scene);
     showFullScreen();
@@ -34,10 +33,10 @@ WindowP::WindowP() :    QWidget()
     // Récupérer la définition de l'écran
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
-    view->setSceneRect(screenGeometry);  // Définir la taille de la vue
+    view->setSceneRect(screenGeometry);  // Définir la taille de la scène
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
-
+    // y adapter la vue
     view->setFixedWidth(screenWidth);
     view->setFixedHeight(screenHeight);
 
@@ -82,30 +81,30 @@ void WindowP::keyPressEvent(QKeyEvent *event) {
 }
 void WindowP::processPendingDatagrams() //OSC traitement
 {
-PacketReader pr;
-while (udpSocket->hasPendingDatagrams()) {
-    oscpkt::Message *msg;
-    QByteArray datagram;
-    datagram.resize(udpSocket->pendingDatagramSize());
-    udpSocket->readDatagram(datagram.data(), datagram.size());
-    pr.init(datagram.data(), datagram.size());
+    PacketReader pr;
+    while (udpSocket->hasPendingDatagrams()) {
+        oscpkt::Message *msg;
+        QByteArray datagram;
+        datagram.resize(udpSocket->pendingDatagramSize());
+        udpSocket->readDatagram(datagram.data(), datagram.size());
+        pr.init(datagram.data(), datagram.size());
 
 
-    while (pr.isOk() && (msg = pr.popMessage()) != 0) {
+        while (pr.isOk() && (msg = pr.popMessage()) != 0) {
 
-        if ((msg->match("/circ/level").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())         &&(channel<=iarg && iarg<=(channel+4)))   {masterLevel(iarg, iarg2);}
-        if ((msg->match("/device/FOCUS/PAN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {pan        (iarg, iarg2);}
-        if ((msg->match("/device/FOCUS/TILT").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {tilt       (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/IRIS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {largeur    (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/FOCUS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {hauteur    (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/FROST").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {rotate     (iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/RED").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {red        (iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/GREEN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())&&(channel<=iarg && iarg<=(channel+4)))   {green      (iarg, iarg2);}
-        if ((msg->match("/device/COLOUR/BLUE").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(channel<=iarg && iarg<=(channel+4)))   {blue       (iarg, iarg2);}
-        if ((msg->match("/device/BEAM/ZOOM").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {thickness  (iarg, iarg2);}
-        if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))                       {picture    (iarg2);}
-           }
-}
+            if ((msg->match("/circ/level").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())         &&(channel<=iarg && iarg<=(channel+4)))   {masterLevel(iarg, iarg2);}
+            if ((msg->match("/device/FOCUS/PAN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {pan(iarg, iarg2);}
+            if ((msg->match("/device/FOCUS/TILT").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {tilt (iarg, iarg2);}
+            if ((msg->match("/device/BEAM/IRIS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {largeur  (iarg, iarg2);}
+            if ((msg->match("/device/BEAM/FOCUS").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {hauteur (iarg, iarg2);}
+            if ((msg->match("/device/BEAM/FROST").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {rotate(iarg, iarg2);}
+            if ((msg->match("/device/COLOUR/RED").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())  &&(channel<=iarg && iarg<=(channel+4)))   {red  (iarg, iarg2);}
+            if ((msg->match("/device/COLOUR/GREEN").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())&&(channel<=iarg && iarg<=(channel+4)))   {green(iarg, iarg2);}
+            if ((msg->match("/device/COLOUR/BLUE").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(channel<=iarg && iarg<=(channel+4)))   {blue (iarg, iarg2);}
+            if ((msg->match("/device/BEAM/ZOOM").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs())   &&(channel<=iarg && iarg<=(channel+4)))   {thickness(iarg, iarg2);}
+            if ((msg->match("/device/EFFECT/GOBO").popInt32(iarg).popInt32(iarg2).isOkNoMoreArgs()) &&(iarg=channel+4))                       {picture(iarg2);}
+        }
+    }
 }
 
 
@@ -153,38 +152,38 @@ void WindowP::blue(int ch, int value)
 }
 void WindowP::pan (int ch, int value)
 {   //qDebug()<<"pan "<<value;
-if (value>=0) X1[ch-channel] = value;
-ligneUpdate();
+    if (value>=0) X1[ch-channel] = value;
+    ligneUpdate();
 }
 
 void WindowP::tilt (int ch, int value)
 {  //qDebug()<<"tilt "<<value;
-if (value>=0) Y1[ch-channel] = value;
-ligneUpdate();
+    if (value>=0) Y1[ch-channel] = value;
+    ligneUpdate();
 }
 
 void WindowP::largeur (int ch, int value)
 {  //qDebug()<<"L "<<value;
-if (value>=0) X2[ch-channel] = value;
-ligneUpdate();
+    if (value>=0) X2[ch-channel] = value;
+    ligneUpdate();
 }
 
 void WindowP::hauteur (int ch, int value)
 {  //qDebug()<<"H "<<value;
-if (value>=0) Y2[ch-channel] = value;
-ligneUpdate();
+    if (value>=0) Y2[ch-channel] = value;
+    ligneUpdate();
 }
 
 void WindowP::rotate(int ch, int value)
 {  //qDebug()<<"rotate "<<value;
-if (value>=0) R[ch-channel] = 360*value/65535;
-ligneUpdate();
+    if (value>=0) R[ch-channel] = 360*value/65535;
+    ligneUpdate();
 }
 
 void WindowP::thickness(int ch, int value)
 {  //qDebug()<<"thick "<<value;
-if (value>=0) epais[ch-channel] = value*size().width()/650000;
-ligneUpdate();
+    if (value>=0) epais[ch-channel] = value*size().width()/650000;
+    ligneUpdate();
 }
 
 void WindowP::picture(int value)
@@ -192,6 +191,8 @@ void WindowP::picture(int value)
     QString path = (QCoreApplication::applicationDirPath() + "/imageLine/");
     QDir dir(path);
     if (!dir.exists()) {dir.mkpath(".");}
+
+    //scene->removeItem(pix);
 
 
     switch (value)
@@ -298,7 +299,7 @@ void WindowP::pictureSacn (int level) //gobos loading sACN
 
     } else if (level >= 23 && level < 46) {
         pict = QPixmap(QCoreApplication::applicationDirPath() + "/imageLine/1.png");
-        if (pict.isNull()) return;
+        if (pict.isNull()) {qDebug() <<"gobo 1 null " << (QCoreApplication::applicationDirPath() + "/imageLine/1.png"); return;}
         pict =  pict.scaled(size().width(), size().height());
         pix->setPixmap (pict);
         //scene->addItem(pix);
@@ -386,7 +387,7 @@ void WindowP::ligneUpdate() //drawings
     rect2->setTransformOriginPoint(rect2->boundingRect().center());
     rect2->setRotation(R[1]);
 
-    ellipse1->setRect(QRectF((X1[2]*size().width()/65535), 2*((size().height()-Y1[2]*size().height()/65535)-Y2[2]*size().height()/65535), (2*X2[2]*size().width()/65535), (2*Y2[2]*size().height()/65535)));
+    ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65535)-X2[2]*size().width()/65535), (Y1[2]*size().height()/65535), (X2[2]*size().width()/65535), (Y2[2]*size().height()/65535)));
     ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
     ellipse1->setRotation(R[2]);
@@ -415,59 +416,146 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     udpSocket->bind(7003);
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
 
-}
+    // Obtenir la liste de toutes les interfaces réseau
+    QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
 
-void WindowP::updateDMXData(const std::vector<int>& newData) {
-    dmxData.clear();
-    for (size_t i = 0; i < newData.size(); ++i) {
-        dmxData.push_back(newData[i]); // Copier les valeurs sans modification
+    // Spécifiez le nom de l'interface réseau que vous souhaitez utiliser
+    // Actions spécifiques en fonction du système d'exploitation
+
+#if defined(Q_OS_MACOS)
+    qDebug() << "Running on macOS";
+    // Code spécifique à macOS
+    QString interfaceName = "en0";
+
+#elif defined(Q_OS_LINUX)
+    //  vérifications supplémentaires pour Ubuntu et Raspbian
+
+#if __has_include(<Ubuntu-specific-header.h>)
+    qDebug() << "Running on Ubuntu";
+    // Code spécifique à Ubuntu
+    QString interfaceName = "enp2s0f1";
+
+#elif __has_include(<Raspbian-specific-header.h>)
+    qDebug() << "Running on Raspbian";
+    // Code spécifique à Raspbian
+    //QString interfaceName = "";
+#else
+    qDebug() << "Running on an unknown Linux distribution";
+
+    // Code pour une distribution Linux inconnue
+    //wifi :
+    QString interfaceName = "wlp3s0";
+
+    //cable :
+    //QString interfaceName = "enp2s0f1";
+
+#endif
+
+
+
+#elif defined(Q_OS_WIN)
+    qDebug() << "Running on Windows";
+    // Code spécifique à Windows
+    //QString interfaceName = "";
+#else
+    qDebug() << "Running on an unsupported OS";
+    // Code pour un système d'exploitation non supporté
+    //QString interfaceName = "";
+#endif
+
+    QNetworkInterface selectedInterface;
+
+    // Trouvez l'interface réseau par son nom
+    foreach (const QNetworkInterface &interface, interfaces) {
+        if (interface.humanReadableName() == interfaceName) {
+            selectedInterface = interface;
+            break;
+        }
     }
 
-    // Log the values to check if they are correctly copied
-   /* std::cout << "Valeurs copiées dans updateDMXData: ";
-    for (const auto& val : dmxData) {
-        std::cout << val << " ";
+    // Utiliser l'interface sélectionnée avec sACNRxSocket
+    if (selectedInterface.isValid()) {
+        qDebug() << "Interface sélectionnée:" << selectedInterface.humanReadableName();
+
+        // Créez une instance de sACNRxSocket
+        sACNRxSocket rxSocket;
+
+        // Définir l'interface réseau
+        rxSocket.setNetworkInterface(selectedInterface);
+
+        // Continuez avec les autres opérations sur rxSocket
+        int universe = 7;  // universe in range 1-63999
+        listener = sACNManager::getInstance()->getListener(universe);
+        if (listener) {
+            connect(listener.data(), SIGNAL(levelsChanged()), this, SLOT(onLevelsChanged()));
+            qDebug() << "Listener created for universe" << universe;
+        } else {
+            qDebug() << "Failed to create listener for universe" << universe;
+        }
+    } else {
+        qDebug() << "Interface non trouvée.";
+        // Iterate through the list of interfaces and print their details
+        for (const QNetworkInterface &interface : interfaces) {
+            qDebug() << "Interface Name:" << interface.humanReadableName();
+            qDebug() << "Hardware Address:" << interface.hardwareAddress();
+
+            // Get all IP addresses associated with this interface
+            QList<QNetworkAddressEntry> entries = interface.addressEntries();
+            for (const QNetworkAddressEntry &entry : entries) {
+                qDebug() << "IP Address:" << entry.ip().toString();
+                qDebug() << "Netmask:" << entry.netmask().toString();
+                qDebug() << "Broadcast:" << entry.broadcast().toString();
+            }
+            qDebug() << "--------------------------------------";
+        }
     }
-    std::cout << std::endl;*/
-
-    processDMXData(); // Traiter les nouvelles données après la mise à jour
-
-    // Mettre à jour previousDMXData avec les nouvelles valeurs
-    previousDMXData = dmxData;
 }
+
+void WindowP::onLevelsChanged() //update sACN -> dmx levels
+{
+    //qDebug() << "Slot onLevelsChanged called!";
+
+    // Mettre à jour le tableau dmxData avec les nouvelles valeurs
+    for (int channel = 99; channel < 197; ++channel) {
+
+        if (channel < 197) {
+            if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
+                dmxData[channel+1] = listener->mergedLevels()[channel].level;
+            } else {
+                qWarning() << "Channel index out of bounds:" << channel;
+            }
+        }
+    }
+    //qDebug() << "tableau mis à jour";
+    processDMXData();
+}
+
 void WindowP::processDMXData() {
-    // Affichage des valeurs
-   /* for (int i = 0; i < dmxData.size(); ++i) {
-        std::cout << "Channel " << i << " Value: " << dmxData[i] << std::endl; // Afficher le numéro de canal et la valeur
-    }*/
-
     // Traiter les données DMX pour les canaux entre 100 et 199
-    for (int baseChannel = 0; baseChannel < 100; baseChannel += 20) {
+    for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
         // Définir les valeurs de `ch` en fonction de baseChannel
         int ch = 0;
         switch (baseChannel) {
-        case 0: ch = 61; break;
-        case 20: ch = 62; break;
-        case 40: ch = 63; break;
-        case 60: ch = 64; break;
-        case 80: ch = 65; break;
+        case 100: ch = 61; break;
+        case 120: ch = 62; break;
+        case 140: ch = 63; break;
+        case 160: ch = 64; break;
+        case 180: ch = 65; break;
         }
 
         // Traiter les canaux 8 bits (100-103, 120-123, 140-143, etc.)
         for (int i = 0; i < 4; ++i) {
             int channel = baseChannel + i;
-            if (channel < 97 && channel>=0) {
+            if (channel < 197 && channel>=100) {
                 int level = dmxData[channel];
-                if (level != previousDMXData[channel]) { // Traiter seulement si la valeur a changé
                 // traitement pour les 4 premiers canaux 8 bits
-                //qDebug() << "ch " << channel << "level " << level;
                 if (!(level < 0)) switch (i) {
                     case 0: masterLevel(ch, level); break;
                     case 1: redSacn(ch, level); break;
                     case 2: greenSacn(ch, level); break;
                     case 3: blueSacn(ch, level); break;
                     }
-            }}
+            }
         }
 
         // Traiter les canaux 16 bits (104-116, 124-136, 144-156, etc.)
@@ -478,8 +566,8 @@ void WindowP::processDMXData() {
                 int highByte = dmxData[highChannel];
                 int lowByte = dmxData[lowChannel];
                 int combinedValue = (highByte << 8) | lowByte;
-                int previousCombinedValue = (previousDMXData[highChannel] << 8) | previousDMXData[lowChannel];
-                if (combinedValue != previousCombinedValue) { // Traiter seulement si la valeur a changé
+                //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
+                // traitement pour les canaux 16 bits
                 if (!(highByte < 0)&&!(lowByte < 0))switch (i) {
                     case 4: pan(ch, combinedValue); break;
                     case 6: tilt(ch, combinedValue); break;
@@ -487,14 +575,13 @@ void WindowP::processDMXData() {
                     case 10: hauteur(ch, combinedValue); break;
                     case 12: thickness(ch, combinedValue); break;
                     case 14: rotate(ch, combinedValue); break;
-                    }}
+                    }
             }
         }
 
-        int level = dmxData[96];
+        int level = dmxData[196];
         //qDebug() << "8-bit channel" << "196" << "level:" << level;
         // traitement pour ce canal 8 bits ici
         if (!(level < 0)) pictureSacn(level);
-
     }
 }
