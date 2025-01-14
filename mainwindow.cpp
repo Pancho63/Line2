@@ -387,7 +387,7 @@ void WindowP::ligneUpdate() //drawings
     rect2->setTransformOriginPoint(rect2->boundingRect().center());
     rect2->setRotation(R[1]);
 
-    ellipse1->setRect(QRectF(((size().width()-X1[2]*size().width()/65535)-X2[2]*size().width()/65535), (Y1[2]*size().height()/65535), (X2[2]*size().width()/65535), (Y2[2]*size().height()/65535)));
+    ellipse1->setRect(QRectF((X1[2]*size().width()/65535), ((size().height()-Y1[2]*size().height()/65535)-Y2[2]*size().height()/65535), (2*X2[2]*size().width()/65535), (2*Y2[2]*size().height()/65535)));
     ellipse1->setPen(QPen(QColor(rouge[2], vert[2], bleu[2], master[2]), epais[2], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipse1->setTransformOriginPoint(ellipse1->boundingRect().center());
     ellipse1->setRotation(R[2]);
