@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include "dmxreceiver.h"
 
 int main(int argc, char *argv[])
 {
