@@ -516,7 +516,7 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
 void WindowP::onLevelsChanged() //update sACN -> dmx levels
 {
-    qDebug() << "Slot onLevelsChanged called!";
+    //qDebug() << "Slot onLevelsChanged called!";
 
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
     for (int channel = 99; channel < 197; ++channel) {
@@ -529,7 +529,7 @@ void WindowP::onLevelsChanged() //update sACN -> dmx levels
             }
         }
     }
-    qDebug() << "tableau mis à jour";
+    //qDebug() << "tableau mis à jour";
     processDMXData();
 }
 
@@ -550,7 +550,7 @@ void WindowP::processDMXData() {
                 int level = dmxData[channel];
                 if (level >= 0) {
                     switch (i) {
-                    case 0: masterLevel(ch, level);qDebug() << "master" << ch << level;break;
+                    case 0: masterLevel(ch, level);break;
                     case 1: redSacn(ch, level); break;
                     case 2: greenSacn(ch, level); break;
                     case 3: blueSacn(ch, level); break;
