@@ -444,10 +444,13 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
     // Code pour une distribution Linux inconnue
     //wifi :
-    QString interfaceName = "wlp3s0";
+    //QString interfaceName = "wlp3s0";
 
     //cable :
     //QString interfaceName = "enp2s0f1";
+
+        //cable :
+    QString interfaceName = "eth0";
 
 #endif
 
