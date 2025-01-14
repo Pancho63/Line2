@@ -4,6 +4,9 @@
 #
 #-------------------------------------------------
 
+DEFINES += __UBUNTU__  # Uncomment this line if you are compiling on Ubuntu
+#DEFINES += __RASPIAN__  # Uncomment this line if you are compiling on Raspbian
+
 QT      += core gui
 QT      += network
 QT      += widgets

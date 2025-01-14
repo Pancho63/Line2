@@ -416,7 +416,7 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     udpSocket->bind(7003);
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
 
-    // Obtenir la liste de toutes les interfaces réseau
+    // sACN : Obtenir la liste de toutes les interfaces réseau
     QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
 
     // Spécifiez le nom de l'interface réseau que vous souhaitez utiliser
@@ -428,34 +428,20 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     QString interfaceName = "en0";
 
 #elif defined(Q_OS_LINUX)
-    //  vérifications supplémentaires pour Ubuntu et Raspbian
-
-#if __has_include(<Ubuntu-specific-header.h>)
+#if defined(__UBUNTU__)
     qDebug() << "Running on Ubuntu";
     // Code spécifique à Ubuntu
-    QString interfaceName = "enp2s0f1";
-
-#elif __has_include(<Raspbian-specific-header.h>)
+    //QString interfaceName = "enp2s0f1";
+    QString interfaceName = "wlp3s0";
+#elif defined(__RASPIAN__)
     qDebug() << "Running on Raspbian";
     // Code spécifique à Raspbian
-    //QString interfaceName = "";
+    QString interfaceName = "eth0";
 #else
     qDebug() << "Running on an unknown Linux distribution";
-
     // Code pour une distribution Linux inconnue
-    //wifi :
-    //QString interfaceName = "wlp3s0";
-
-    //cable :
-    //QString interfaceName = "enp2s0f1";
-
-        //cable :
     QString interfaceName = "eth0";
-
 #endif
-
-
-
 #elif defined(Q_OS_WIN)
     qDebug() << "Running on Windows";
     // Code spécifique à Windows
@@ -465,6 +451,8 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     // Code pour un système d'exploitation non supporté
     //QString interfaceName = "";
 #endif
+
+
 
     QNetworkInterface selectedInterface;
 
@@ -516,7 +504,7 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
 void WindowP::onLevelsChanged() //update sACN -> dmx levels
 {
-    //qDebug() << "Slot onLevelsChanged called!";
+   // qDebug() << "Slot onLevelsChanged called!";
 
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
     for (int channel = 99; channel < 197; ++channel) {
@@ -529,59 +517,47 @@ void WindowP::onLevelsChanged() //update sACN -> dmx levels
             }
         }
     }
-    //qDebug() << "tableau mis à jour";
+   // qDebug() << "tableau mis à jour";
     processDMXData();
 }
 
 void WindowP::processDMXData() {
-    // Define a mapping for baseChannel to ch values
     std::map<int, int> baseChannelToCh = {
         {100, 61}, {120, 62}, {140, 63}, {160, 64}, {180, 65}
     };
 
-    // Process DMX data for channels between 100 and 199
-    for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
-        int ch = baseChannelToCh[baseChannel];
-
+    for (auto& [baseChannel, ch] : baseChannelToCh) {
         // Process 8-bit channels
-        for (int i = 0; i < 4; ++i) {
-            int channel = baseChannel + i;
-            if (channel < 197 && channel >= 100) {
-                int level = dmxData[channel];
-                if (level >= 0) {
-                    switch (i) {
-                    case 0: masterLevel(ch, level);break;
-                    case 1: redSacn(ch, level); break;
-                    case 2: greenSacn(ch, level); break;
-                    case 3: blueSacn(ch, level); break;
-                    }
+        int* ptr = &dmxData[baseChannel];
+        for (int i = 0; i < 4; ++i, ++ptr) {
+            if (baseChannel + i < 197 && baseChannel + i >= 100 && *ptr >= 0) {
+                switch (i) {
+                case 0: masterLevel(ch, *ptr);  break;
+                case 1: redSacn(ch, *ptr); break;
+                case 2: greenSacn(ch, *ptr); break;
+                case 3: blueSacn(ch, *ptr); break;
                 }
             }
         }
 
         // Process 16-bit channels
-        for (int i = 4; i < 16; i += 2) {
-            int highChannel = baseChannel + i;
-            int lowChannel = baseChannel + i + 1;
-            if (highChannel < 512 && lowChannel < 512) {
-                int highByte = dmxData[highChannel];
-                int lowByte = dmxData[lowChannel];
-                int combinedValue = (highByte << 8) | lowByte;
-                if (highByte >= 0 && lowByte >= 0) {
-                    switch (i) {
-                    case 4: pan(ch, combinedValue); break;
-                    case 6: tilt(ch, combinedValue); break;
-                    case 8: largeur(ch, combinedValue); break;
-                    case 10: hauteur(ch, combinedValue); break;
-                    case 12: thickness(ch, combinedValue); break;
-                    case 14: rotate(ch, combinedValue); break;
-                    }
+        ptr = &dmxData[baseChannel + 4];
+        for (int i = 4; i < 16; i += 2, ptr += 2) {
+            if (baseChannel + i < 512 && baseChannel + i + 1 < 512 && *ptr >= 0 && *(ptr + 1) >= 0) {
+                int combinedValue = (*ptr << 8) | *(ptr + 1);
+                switch (i) {
+                case 4: pan(ch, combinedValue); break;
+                case 6: tilt(ch, combinedValue); break;
+                case 8: largeur(ch, combinedValue); break;
+                case 10: hauteur(ch, combinedValue); break;
+                case 12: thickness(ch, combinedValue); break;
+                case 14: rotate(ch, combinedValue); break;
                 }
             }
         }
-
-        // Process specific 8-bit channel 196
-        int level = dmxData[196];
-        if (level >= 0) pictureSacn(level);
     }
+
+    // Process specific 8-bit channel 196
+    int level = dmxData[196];
+    if (level >= 0) pictureSacn(level);
 }
