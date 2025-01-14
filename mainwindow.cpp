@@ -513,7 +513,7 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 
 void WindowP::onLevelsChanged() //update sACN -> dmx levels
 {
-    //qDebug() << "Slot onLevelsChanged called!";
+    qDebug() << "Slot onLevelsChanged called!";
 
     // Mettre à jour le tableau dmxData avec les nouvelles valeurs
     for (int channel = 99; channel < 197; ++channel) {
@@ -526,39 +526,37 @@ void WindowP::onLevelsChanged() //update sACN -> dmx levels
             }
         }
     }
-    //qDebug() << "tableau mis à jour";
+    qDebug() << "tableau mis à jour";
     processDMXData();
 }
 
 void WindowP::processDMXData() {
-    // Traiter les données DMX pour les canaux entre 100 et 199
-    for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
-        // Définir les valeurs de `ch` en fonction de baseChannel
-        int ch = 0;
-        switch (baseChannel) {
-        case 100: ch = 61; break;
-        case 120: ch = 62; break;
-        case 140: ch = 63; break;
-        case 160: ch = 64; break;
-        case 180: ch = 65; break;
-        }
+    // Define a mapping for baseChannel to ch values
+    std::map<int, int> baseChannelToCh = {
+        {100, 61}, {120, 62}, {140, 63}, {160, 64}, {180, 65}
+    };
 
-        // Traiter les canaux 8 bits (100-103, 120-123, 140-143, etc.)
+    // Process DMX data for channels between 100 and 199
+    for (int baseChannel = 100; baseChannel < 200; baseChannel += 20) {
+        int ch = baseChannelToCh[baseChannel];
+
+        // Process 8-bit channels
         for (int i = 0; i < 4; ++i) {
             int channel = baseChannel + i;
-            if (channel < 197 && channel>=100) {
+            if (channel < 197 && channel >= 100) {
                 int level = dmxData[channel];
-                // traitement pour les 4 premiers canaux 8 bits
-                if (!(level < 0)) switch (i) {
-                    case 0: masterLevel(ch, level); break;
+                if (level >= 0) {
+                    switch (i) {
+                    case 0: masterLevel(ch, level);qDebug() << "master" << ch << level;break;
                     case 1: redSacn(ch, level); break;
                     case 2: greenSacn(ch, level); break;
                     case 3: blueSacn(ch, level); break;
                     }
+                }
             }
         }
 
-        // Traiter les canaux 16 bits (104-116, 124-136, 144-156, etc.)
+        // Process 16-bit channels
         for (int i = 4; i < 16; i += 2) {
             int highChannel = baseChannel + i;
             int lowChannel = baseChannel + i + 1;
@@ -566,9 +564,8 @@ void WindowP::processDMXData() {
                 int highByte = dmxData[highChannel];
                 int lowByte = dmxData[lowChannel];
                 int combinedValue = (highByte << 8) | lowByte;
-                //qDebug() << "16-bit channels" << highChannel << "and" << lowChannel << "combined value:" << combinedValue;
-                // traitement pour les canaux 16 bits
-                if (!(highByte < 0)&&!(lowByte < 0))switch (i) {
+                if (highByte >= 0 && lowByte >= 0) {
+                    switch (i) {
                     case 4: pan(ch, combinedValue); break;
                     case 6: tilt(ch, combinedValue); break;
                     case 8: largeur(ch, combinedValue); break;
@@ -576,12 +573,12 @@ void WindowP::processDMXData() {
                     case 12: thickness(ch, combinedValue); break;
                     case 14: rotate(ch, combinedValue); break;
                     }
+                }
             }
         }
 
+        // Process specific 8-bit channel 196
         int level = dmxData[196];
-        //qDebug() << "8-bit channel" << "196" << "level:" << level;
-        // traitement pour ce canal 8 bits ici
-        if (!(level < 0)) pictureSacn(level);
+        if (level >= 0) pictureSacn(level);
     }
 }
