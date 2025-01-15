@@ -16,11 +16,13 @@ First rectangle :
 142 - 155 : Elipse 2  
 Pimax  
 -156 : Master  
--161 : 360° rotation -162 163 : 16bit PAN  
+
+-161 : 360° rotation 
+-162 163 : 16bit PAN  
 -164 165 : 16Bit TILT  
 -166 167 : 16Bit width  
 -168 169 : 16Bit height  
-
+ 
 -170 : load image : 11 ranges : 1 : no image, 2 : image1 .... 11 : image10  
 
 in OSC respond to port 7003, initialy conceived for DLight lighting software
