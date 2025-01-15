@@ -18,7 +18,7 @@ int         channel =     61;
 
 QSharedPointer<sACNListener> listener;
 
-WindowP::WindowP() :    QWidget(), dmxData(512, 0)
+WindowP::WindowP() :    QWidget(), dmxData(71, 0)
 
 {   //initialisations
 
@@ -502,62 +502,51 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
     }
 }
 
-void WindowP::onLevelsChanged() //update sACN -> dmx levels
-{
-   // qDebug() << "Slot onLevelsChanged called!";
-
-    // Mettre à jour le tableau dmxData avec les nouvelles valeurs
-    for (int channel = 99; channel < 197; ++channel) {
-
-        if (channel < 197) {
-            if (channel >= 0 && channel < dmxData.size() && channel < listener->mergedLevels().size()) {
-                dmxData[channel+1] = listener->mergedLevels()[channel].level;
-            } else {
-                qWarning() << "Channel index out of bounds:" << channel;
-            }
+void WindowP::onLevelsChanged() {
+    for (int channel = 99; channel < 170; ++channel) {
+        if (channel - 99 < dmxData.size() && channel < listener->mergedLevels().size()) {
+            dmxData[channel - 99] = listener->mergedLevels()[channel].level;
+        } else {
+            qWarning() << "Channel index out of bounds:" << channel;
         }
     }
-   // qDebug() << "tableau mis à jour";
     processDMXData();
 }
 
 void WindowP::processDMXData() {
     std::map<int, int> baseChannelToCh = {
-        {100, 61}, {120, 62}, {140, 63}, {160, 64}, {180, 65}
+        {0, 61}, {14, 62}, {28, 63}, {42, 64}, {56, 65}
     };
 
     for (auto& [baseChannel, ch] : baseChannelToCh) {
-        // Process 8-bit channels
         int* ptr = &dmxData[baseChannel];
-        for (int i = 0; i < 4; ++i, ++ptr) {
-            if (baseChannel + i < 197 && baseChannel + i >= 100 && *ptr >= 0) {
+        for (int i = 0; i < 6; ++i, ++ptr) {
+            if (baseChannel + i < dmxData.size() && *ptr >= 0) {
                 switch (i) {
                 case 0: masterLevel(ch, *ptr);  break;
                 case 1: redSacn(ch, *ptr); break;
                 case 2: greenSacn(ch, *ptr); break;
                 case 3: blueSacn(ch, *ptr); break;
+                case 4: thickness(ch, *ptr*256); break;
+                case 5: rotate(ch, *ptr*256); break;
                 }
             }
         }
 
-        // Process 16-bit channels
-        ptr = &dmxData[baseChannel + 4];
-        for (int i = 4; i < 16; i += 2, ptr += 2) {
-            if (baseChannel + i < 512 && baseChannel + i + 1 < 512 && *ptr >= 0 && *(ptr + 1) >= 0) {
+        ptr = &dmxData[baseChannel + 6];
+        for (int i = 6; i < 14; i += 2, ptr += 2) {
+            if (baseChannel + i < dmxData.size() && baseChannel + i + 1 < dmxData.size() && *ptr >= 0 && *(ptr + 1) >= 0) {
                 int combinedValue = (*ptr << 8) | *(ptr + 1);
                 switch (i) {
-                case 4: pan(ch, combinedValue); break;
-                case 6: tilt(ch, combinedValue); break;
-                case 8: largeur(ch, combinedValue); break;
-                case 10: hauteur(ch, combinedValue); break;
-                case 12: thickness(ch, combinedValue); break;
-                case 14: rotate(ch, combinedValue); break;
+                case 6: pan(ch, combinedValue); break;
+                case 8: tilt(ch, combinedValue); break;
+                case 10: largeur(ch, combinedValue); break;
+                case 12: hauteur(ch, combinedValue); break;
                 }
             }
         }
     }
 
-    // Process specific 8-bit channel 196
-    int level = dmxData[196];
+    int level = dmxData[70];
     if (level >= 0) pictureSacn(level);
 }
