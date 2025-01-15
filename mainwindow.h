@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QUdpSocket>
 #include <QNetworkInterface>
+#include <QUdpSocket>
 #include "oscpkt.hh"
 #include "sacn/ACNShare/CID.h"
 #include "sacn/ACNShare/VHD.h"
@@ -15,35 +15,31 @@
 #include <QApplication>
 #include <QCoreApplication>
 
-#include <QWindow>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsLineItem>
-#include <QGraphicsRectItem>
+#include <QCursor>
 #include <QGraphicsEllipseItem>
+#include <QGraphicsLineItem>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsRectItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QPen>
 #include <QPixmap>
-#include <QCursor>
+#include <QWindow>
 
-#include <QTextStream>
+#include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QDebug>
 #include <QKeyEvent>
-#include <QShortcut>
 #include <QScreen>
+#include <QShortcut>
+#include <QTextStream>
 
+#include <chrono>
 #include <fstream>
 #include <string>
-#include <chrono>
 #include <thread>
 
-
-
-
 using namespace oscpkt;
-
 
 class WindowP : public QWidget
 {
@@ -56,7 +52,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
-    QUdpSocket  *udpSocket;
+    QUdpSocket *udpSocket;
     QNetworkInterface interface;
     QSharedPointer<sACNListener> listener;
     void setupNetworkInterfaces();
@@ -71,7 +67,6 @@ private:
     QGraphicsView *view;
     QGraphicsPixmapItem *pix;
     QPixmap pict;
-
 
     //    VideoProj *videoproj;
 private slots:
@@ -96,7 +91,6 @@ private slots:
 
 public slots:
     void onLevelsChanged();
-
 };
 
 #endif // MAINWINDOW_H
