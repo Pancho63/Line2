@@ -205,7 +205,9 @@ void sACNListener::processDatagram(QByteArray data, QHostAddress receiver, QHost
             // Unicast, send to releivent listener!
             const QHash<int, QWeakPointer<sACNListener> > listenerList = sACNManager::getInstance()->getListenerList();
             if (listenerList.contains(universe))
-                listenerList[universe].data()->processDatagram(data, receiver, sender);
+                if (auto listener = listenerList[universe].toStrongRef()) {
+                    listener->processDatagram(data, receiver, sender);
+                }
             return;
         }
     }
@@ -333,7 +335,7 @@ void sACNListener::processDatagram(QByteArray data, QHostAddress receiver, QHost
 
     if(!validpacket)
     {
-        qDebug() << "sACNListener" << QThread::currentThreadId() << ": Source coming up, not processing packet";
+        //qDebug() << "sACNListener" << QThread::currentThreadId() << ": Source coming up, not processing packet";
         return;
     }
 

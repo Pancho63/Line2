@@ -34,11 +34,6 @@
 #include <QShortcut>
 #include <QTextStream>
 
-#include <chrono>
-#include <fstream>
-#include <string>
-#include <thread>
-
 using namespace oscpkt;
 
 class WindowP : public QWidget

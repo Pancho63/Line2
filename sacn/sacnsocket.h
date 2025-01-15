@@ -18,6 +18,7 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QVariant>
 
 class sACNRxSocket : public QUdpSocket
 {
