@@ -34,6 +34,13 @@
 #include <QShortcut>
 #include <QScreen>
 
+#include <fstream>
+#include <string>
+#include <chrono>
+#include <thread>
+
+
+
 
 using namespace oscpkt;
 
