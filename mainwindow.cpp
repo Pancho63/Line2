@@ -1,19 +1,5 @@
 #include "mainwindow.h"
 #include <QScreen>
-#include <fstream>
-#include <sstream>
-
-float getCPUUsage()
-{
-    std::ifstream file("/proc/stat");
-    std::string line;
-    std::getline(file, line);
-    std::istringstream ss(line);
-    std::string cpu;
-    float user, nice, system, idle;
-    ss >> cpu >> user >> nice >> system >> idle;
-    return (user + nice + system) / (user + nice + system + idle) * 100;
-}
 
 int iarg;
 int iarg2;
@@ -615,8 +601,7 @@ void WindowP::setupNetworkInterfaces()
 
 void WindowP::onLevelsChanged()
 {
-    float cpuUsage = getCPUUsage();
-    if (cpuUsage < 90.0) {
+
         for (int channel = 99; channel < 170; ++channel) {
             if (channel - 99 < dmxData.size() && channel < listener->mergedLevels().size()) {
                 dmxData[channel - 99] = listener->mergedLevels()[channel].level;
@@ -625,9 +610,7 @@ void WindowP::onLevelsChanged()
             }
         }
         processDMXData();
-    } else {
-        qWarning() << "CPU usage is too high: " << cpuUsage << "%";
-    }
+
 }
 
 void WindowP::processDMXData()
