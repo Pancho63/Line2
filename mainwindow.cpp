@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include <QScreen>
+#include <fstream>
+#include <sstream>
 
 int         iarg;
 int         iarg2;
@@ -17,6 +19,16 @@ qreal       epais[5]=     {0, 0, 0, 0, 0};
 int         channel =     61;
 
 QSharedPointer<sACNListener> listener;
+float getCPUUsage() {
+    std::ifstream file("/proc/stat");
+    std::string line;
+    std::getline(file, line);
+    std::istringstream ss(line);
+    std::string cpu;
+    float user, nice, system, idle;
+    ss >> cpu >> user >> nice >> system >> idle;
+    return (user + nice + system) / (user + nice + system + idle) * 100;
+}
 
 WindowP::WindowP() :    QWidget(), dmxData(71, 0)
 
