@@ -4,6 +4,13 @@
 #include <QUdpSocket>
 #include <QNetworkInterface>
 #include "oscpkt.hh"
+#include "sacn/ACNShare/CID.h"
+#include "sacn/ACNShare/VHD.h"
+#include "sacn/ACNShare/defpack.h"
+#include "sacn/ACNShare/ipaddr.h"
+#include "sacn/ACNShare/tock.h"
+#include "sacn/sacnlistener.h"
+#include "sacn/streamingacn.h"
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -26,7 +33,13 @@
 #include <QKeyEvent>
 #include <QShortcut>
 #include <QScreen>
-#include <QVector>
+
+#include <fstream>
+#include <string>
+#include <chrono>
+#include <thread>
+
+
 
 
 using namespace oscpkt;
@@ -37,8 +50,7 @@ class WindowP : public QWidget
     Q_OBJECT
 
 public:
-     WindowP();
-     void updateDMXData(const std::vector<int>& newData);
+    WindowP();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -46,32 +58,25 @@ protected:
 private:
     QUdpSocket  *udpSocket;
     QNetworkInterface interface;
-
+    QSharedPointer<sACNListener> listener;
     void setupNetworkInterfaces();
-
+    void processDMXData();
 
     QVector<int> dmxData;
-    QVector<int> previousDMXData; // Ajouter un vecteur pour stocker les valeurs précédentes
-
     QGraphicsRectItem *rect1;
     QGraphicsEllipseItem *ellipse1;
     QGraphicsRectItem *rect2;
     QGraphicsEllipseItem *ellipse2;
-    QGraphicsPixmapItem *pix;
-
-    QPixmap pict;
     QGraphicsScene *scene;
     QGraphicsView *view;
+    QGraphicsPixmapItem *pix;
+    QPixmap pict;
 
 
+    //    VideoProj *videoproj;
 private slots:
     void processPendingDatagrams();
 
-
-
-    void ligneUpdate();
-
-public slots:
     void masterLevel(int, int);
     void pan(int, int);
     void tilt(int, int);
@@ -87,10 +92,10 @@ public slots:
     void thickness(int, int);
     void picture(int);
     void pictureSacn(int);
-    void processDMXData();
+    void ligneUpdate();
 
-     //void onLevelsChanged();
-     //void checkAndProcessDMXData();
+public slots:
+    void onLevelsChanged();
 
 };
 
