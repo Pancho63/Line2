@@ -503,14 +503,19 @@ void WindowP::setupNetworkInterfaces() { //interface sACN et OSC
 }
 
 void WindowP::onLevelsChanged() {
-    for (int channel = 99; channel < 170; ++channel) {
-        if (channel - 99 < dmxData.size() && channel < listener->mergedLevels().size()) {
-            dmxData[channel - 99] = listener->mergedLevels()[channel].level;
-        } else {
-            qWarning() << "Channel index out of bounds:" << channel;
+    float cpuUsage = getCPUUsage();
+    if (cpuUsage < 90.0) {
+        for (int channel = 99; channel < 170; ++channel) {
+            if (channel - 99 < dmxData.size() && channel < listener->mergedLevels().size()) {
+                dmxData[channel - 99] = listener->mergedLevels()[channel].level;
+            } else {
+                qWarning() << "Channel index out of bounds:" << channel;
+            }
         }
+        processDMXData();
+    } else {
+        qWarning() << "CPU usage is too high: " << cpuUsage << "%";
     }
-    processDMXData();
 }
 
 void WindowP::processDMXData() {
